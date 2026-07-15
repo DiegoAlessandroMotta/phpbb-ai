@@ -76,12 +76,16 @@ class acp_extraction
 	public function display()
 	{
 		$lastRun = (int) ($this->config['portal_extraction_last_run'] ?? 0);
+		$apiKey = trim((string) ($this->config['portal_ai_gemini_api_key'] ?? ''));
+		$model = (string) ($this->config['portal_ai_gemini_model'] ?? 'gemini-3.1-flash-lite');
 
 		$this->template->assign_vars([
-			'U_ACTION'             => $this->u_action,
-			'S_EXTRACTION_ENABLED' => !empty($this->config['portal_extraction_enabled']),
-			'S_LLM_CONFIGURED'     => $this->extraction->isConfigured(),
-			'LAST_RUN_FORMATTED'   => $lastRun > 0 ? $this->user->format_date($lastRun) : '',
+			'U_ACTION'                 => $this->u_action,
+			'S_EXTRACTION_ENABLED'     => !empty($this->config['portal_extraction_enabled']),
+			'S_LLM_CONFIGURED'         => $this->extraction->isConfigured(),
+			'S_PORTAL_NEWS_LLM_KEY_SET'=> $apiKey !== '',
+			'PORTAL_AI_GEMINI_MODEL'   => $model,
+			'LAST_RUN_FORMATTED'       => $lastRun > 0 ? $this->user->format_date($lastRun) : '',
 		]);
 
 		foreach ($this->load_recent_extractions(50) as $row) {
@@ -110,6 +114,35 @@ class acp_extraction
 				'S_HAS_ERROR'       => !empty($row['error_message']),
 			]);
 		}
+	}
+
+	/**
+	 * Handle the config-form POST. Updates portal_ai_gemini_model
+	 * and (only if non-empty) portal_ai_gemini_api_key. The key
+	 * field is type=password, so the browser sends an empty value
+	 * when the admin leaves it untouched — we treat that as "keep
+	 * the current key" rather than clobbering it.
+	 */
+	public function save_options()
+	{
+		$apiKey = trim((string) $this->request->variable('portal_ai_gemini_api_key', '', true));
+		$model = trim((string) $this->request->variable('portal_ai_gemini_model', '', true));
+
+		if ($model === '') {
+			$model = 'gemini-3.1-flash-lite';
+		}
+		$this->config->set('portal_ai_gemini_model', $model);
+
+		// Only update the key if the admin actually typed something.
+		// An empty POST value means "leave the current key alone".
+		if ($apiKey !== '') {
+			$this->config->set('portal_ai_gemini_api_key', $apiKey);
+		}
+
+		trigger_error(
+			$this->user->lang['ACP_PORTAL_EXTRACTION_SAVED'] . adm_back_link($this->u_action),
+			E_USER_NOTICE
+		);
 	}
 
 	/**

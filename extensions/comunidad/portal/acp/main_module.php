@@ -41,6 +41,9 @@ class main_module
 			if ($request->is_set_post('reextract')) {
 				$controller->reextract($request->variable('topic_id', 0));
 			}
+			else if ($request->is_set_post('save')) {
+				$controller->save_options();
+			}
 
 			$controller->display();
 			return;
