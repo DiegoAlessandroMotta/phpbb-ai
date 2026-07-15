@@ -67,8 +67,8 @@ class OpenAIClient implements LlmClient
 					'schema' => $jsonSchema,
 				],
 			],
-			'max_tokens'   => $maxOutputTokens,
-			'temperature'  => 0.0,
+			'max_completion_tokens' => $maxOutputTokens,
+			'temperature'           => 0.0,
 		];
 
 		$decoded = $this->call($body);
@@ -110,8 +110,8 @@ class OpenAIClient implements LlmClient
 				['role' => 'system', 'content' => $systemPrompt],
 				['role' => 'user',   'content' => $userText],
 			],
-			'max_tokens'  => $maxOutputTokens,
-			'temperature' => 0.4,
+			'max_completion_tokens' => $maxOutputTokens,
+			'temperature'           => 0.4,
 		];
 
 		$decoded = $this->call($body);
