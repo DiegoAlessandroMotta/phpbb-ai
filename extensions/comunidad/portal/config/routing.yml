@@ -1,3 +1,8 @@
 comunidad_portal_index:
     path: /portal
     defaults: { _controller: comunidad.portal.controller:index }
+
+comunidad_portal_assistant:
+    path: /portal/assistant
+    defaults: { _controller: comunidad.portal.controller.assistant:run }
+    methods: [POST]

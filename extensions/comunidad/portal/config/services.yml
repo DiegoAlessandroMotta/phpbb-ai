@@ -94,3 +94,21 @@ services:
             - '@config'
             - '@dbal.conn'
             - '%core.table_prefix%'
+
+    comunidad.portal.assistant.service:
+        class: comunidad\portal\service\assistant\AssistantService
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@comunidad.portal.llm.client'
+            - '@comunidad.portal.assistant.rate_limiter'
+            - '%core.table_prefix%'
+
+    comunidad.portal.controller.assistant:
+        class: comunidad\portal\controller\assistant
+        arguments:
+            - '@config'
+            - '@request'
+            - '@user'
+            - '@auth'
+            - '@comunidad.portal.assistant.service'
