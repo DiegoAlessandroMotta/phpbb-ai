@@ -112,3 +112,15 @@ services:
             - '@user'
             - '@auth'
             - '@comunidad.portal.assistant.service'
+
+    comunidad.portal.listener.assistant:
+        class: comunidad\portal\event\assistant_listener
+        arguments:
+            - '@config'
+            - '@template'
+            - '@user'
+            - '@controller.helper'
+            - '@comunidad.portal.llm.client'
+            - '@comunidad.portal.assistant.rate_limiter'
+        tags:
+            - { name: event.listener }

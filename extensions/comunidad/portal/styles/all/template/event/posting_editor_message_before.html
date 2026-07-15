@@ -1,0 +1,87 @@
+<!-- INCLUDECSS @comunidad_portal/assistant.css -->
+<!-- IF S_PORTAL_ASSISTANT_ENABLED -->
+<div class="portal-assistant" id="portal-assistant-editor"
+	 data-endpoint="{U_PORTAL_ASSISTANT_ENDPOINT}"
+	 data-token="{PORTAL_ASSISTANT_FORM_TOKEN}"
+	 data-surface="editor"
+	 data-remaining="{PORTAL_ASSISTANT_REMAINING}"
+	 data-limit="{PORTAL_ASSISTANT_LIMIT}">
+
+	<div class="portal-assistant-bar">
+		<span class="portal-assistant-label">{L_PORTAL_ASSISTANT_LABEL}</span>
+		<span class="portal-assistant-quota" id="portal-assistant-quota-editor">
+			{PORTAL_ASSISTANT_REMAINING}/{PORTAL_ASSISTANT_LIMIT}
+		</span>
+	</div>
+
+	<!-- IF not S_PORTAL_AI_READY -->
+	<div class="portal-assistant-disabled">{L_PORTAL_ASSISTANT_NOT_CONFIGURED}</div>
+	<!-- ELSE -->
+	<div class="portal-assistant-buttons">
+		<button type="button" class="button portal-assistant-btn" data-action="improve"><!-- IF S_PORTAL_ASSISTANT_CAN_RUN --><!-- ELSE -->disabled<!-- ENDIF -->>{L_PORTAL_ASSISTANT_IMPROVE}</button>
+		<button type="button" class="button portal-assistant-btn" data-action="friendly"><!-- IF S_PORTAL_ASSISTANT_CAN_RUN --><!-- ELSE -->disabled<!-- ENDIF -->>{L_PORTAL_ASSISTANT_FRIENDLY}</button>
+		<button type="button" class="button portal-assistant-btn" data-action="summary"><!-- IF S_PORTAL_ASSISTANT_CAN_RUN --><!-- ELSE -->disabled<!-- ENDIF -->>{L_PORTAL_ASSISTANT_SUMMARY}</button>
+		<button type="button" class="button portal-assistant-btn" data-action="title"><!-- IF S_PORTAL_ASSISTANT_CAN_RUN --><!-- ELSE -->disabled<!-- ENDIF -->>{L_PORTAL_ASSISTANT_TITLE}</button>
+	</div>
+	<div class="portal-assistant-status" id="portal-assistant-status-editor" hidden></div>
+	<!-- ENDIF -->
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var root = document.getElementById('portal-assistant-editor');
+	if (!root) { return; }
+	var status = document.getElementById('portal-assistant-status-editor');
+	var quota  = document.getElementById('portal-assistant-quota-editor');
+	var editor = document.getElementsByName('message')[0];
+	var endpoint = root.getAttribute('data-endpoint');
+	var token    = root.getAttribute('data-token');
+	var limit    = parseInt(root.getAttribute('data-limit') || '0', 10);
+	var btns     = root.querySelectorAll('.portal-assistant-btn');
+
+	function setStatus(kind, text) {
+		if (!status) { return; }
+		status.hidden = false;
+		status.className = 'portal-assistant-status portal-assistant-status-' + kind;
+		status.textContent = text;
+	}
+	function setRemaining(n) {
+		if (quota) { quota.textContent = n + '/' + limit; }
+		btns.forEach(function (b) { b.disabled = !(n > 0); });
+	}
+	function run(action) {
+		if (!editor) { return; }
+		var text = editor.value.trim();
+		if (!text) { setStatus('error', '{L_PORTAL_ASSISTANT_EMPTY_ERROR}'); return; }
+		btns.forEach(function (b) { b.disabled = true; });
+		setStatus('thinking', '{L_PORTAL_ASSISTANT_THINKING}');
+		fetch(endpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			credentials: 'same-origin',
+			body: 'action=' + encodeURIComponent(action) + '&text=' + encodeURIComponent(text) + '&form_token=' + encodeURIComponent(token)
+		}).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+		.then(function (res) {
+			if (res.j && res.j.ok) {
+				editor.value = res.j.text;
+				setStatus('ok', '{L_PORTAL_ASSISTANT_REVIEW_BEFORE_PUBLISH}');
+				if (typeof res.j.remaining === 'number') { setRemaining(res.j.remaining); }
+			} else {
+				setStatus('error', (res.j && res.j.error) ? res.j.error : '{L_PORTAL_ASSISTANT_GENERIC_ERROR}');
+				btns.forEach(function (b) { b.disabled = false; });
+			}
+		}).catch(function () {
+			setStatus('error', '{L_PORTAL_ASSISTANT_NETWORK_ERROR}');
+			btns.forEach(function (b) { b.disabled = false; });
+		});
+	}
+	btns.forEach(function (b) {
+		b.addEventListener('click', function () { run(b.getAttribute('data-action')); });
+	});
+})();
+</script>
+<!-- ENDIF -->
