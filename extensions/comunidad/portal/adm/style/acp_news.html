@@ -1,0 +1,38 @@
+<!-- INCLUDE overall_header.html -->
+
+<a id="maincontent"></a>
+
+<h1>{L_ACP_PORTAL_NEWS}</h1>
+
+<p>{L_ACP_PORTAL_NEWS_EXPLAIN}</p>
+
+<form id="acp_portal_news" method="post" action="{U_ACTION}">
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_NEWS_LEGEND}</legend>
+
+	<dl>
+		<dt><label for="portal_news_forum_id">{L_ACP_PORTAL_NEWS_FORUM}</label><br /><span class="explain">{L_ACP_PORTAL_NEWS_FORUM_EXPLAIN}</span></dt>
+		<dd>
+			<select name="portal_news_forum_id" id="portal_news_forum_id">
+				<!-- BEGIN portal_news_forums -->
+				<option value="{portal_news_forums.FORUM_ID}"<!-- IF portal_news_forums.S_SELECTED --> selected="selected"<!-- ENDIF -->>{portal_news_forums.FORUM_NAME}</option>
+				<!-- END portal_news_forums -->
+			</select>
+		</dd>
+	</dl>
+
+	<dl>
+		<dt><label for="portal_news_limit">{L_ACP_PORTAL_NEWS_LIMIT}</label><br /><span class="explain">{L_ACP_PORTAL_NEWS_LIMIT_EXPLAIN}</span></dt>
+		<dd><input type="number" name="portal_news_limit" id="portal_news_limit" value="{PORTAL_NEWS_LIMIT}" min="1" max="10" size="3" /></dd>
+	</dl>
+
+	<p class="submit-buttons">
+		<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />
+		<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+	</p>
+</fieldset>
+
+</form>
+
+<!-- INCLUDE overall_footer.html -->

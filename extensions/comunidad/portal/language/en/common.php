@@ -24,4 +24,6 @@ $lang = array_merge($lang, [
     'PORTAL_LAST_POST_BY' => 'Last post by',
     'PORTAL_JOINED' => 'Joined',
     'PORTAL_NO_CONTENT' => 'There is no content to display yet.',
+    'PORTAL_NEWS' => 'News',
+    'PORTAL_NEWS_READ_MORE' => 'Read more',
 ]);

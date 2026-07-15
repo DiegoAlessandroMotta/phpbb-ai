@@ -11,6 +11,15 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
 
+    comunidad.portal.acp.controller:
+        class: comunidad\portal\controller\acp_news
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@request'
+            - '@template'
+            - '@user'
+
     comunidad.portal.listener:
         class: comunidad\portal\event\main_listener
         arguments:

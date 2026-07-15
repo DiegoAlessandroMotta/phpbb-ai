@@ -22,6 +22,29 @@
         <div><strong>{TOTAL_USERS}</strong><span>{L_PORTAL_USERS}</span></div>
     </section>
 
+    <!-- IF S_NEWS_ENABLED and S_NEWS_HAS_CONTENT -->
+    <section class="portal-news" aria-label="{L_PORTAL_NEWS}">
+        <div class="portal-news-head">
+            <h2><i class="icon fa-newspaper-o fa-fw"></i> {L_PORTAL_NEWS}</h2>
+        </div>
+        <div class="portal-news-grid">
+            <!-- BEGIN news -->
+            <article class="portal-news-card">
+                <h3 class="portal-news-title"><a href="{news.U_TOPIC}">{news.TITLE}</a></h3>
+                <div class="portal-news-meta">
+                    <span class="portal-news-author">{news.AUTHOR}</span>
+                    <time class="portal-news-date">{news.DATE}</time>
+                </div>
+                <!-- IF news.EXCERPT -->
+                <p class="portal-news-excerpt">{news.EXCERPT}</p>
+                <!-- ENDIF -->
+                <a class="portal-news-more" href="{news.U_TOPIC}">{L_PORTAL_NEWS_READ_MORE} <i class="icon fa-angle-right fa-fw"></i></a>
+            </article>
+            <!-- END news -->
+        </div>
+    </section>
+    <!-- ENDIF -->
+
     <div class="portal-grid">
         <main class="portal-main">
             <section class="portal-card">

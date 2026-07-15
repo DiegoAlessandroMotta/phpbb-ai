@@ -32,6 +32,18 @@
 .portal-stats strong { font-size: 25px; color: #1f5f99; }
 .portal-stats span { margin-top: 4px; color: #667; }
 .portal-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, .8fr); gap: 16px; }
+.portal-news { margin: 4px 0 18px; }
+.portal-news-head { margin: 0 0 12px; }
+.portal-news-head h2 { margin: 0; font-size: 22px; color: #24364b; }
+.portal-news-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.portal-news-card { display: flex; flex-direction: column; padding: 18px 20px; border-radius: var(--portal-radius); background: #fff; box-shadow: var(--portal-shadow); border: 1px solid #e7e9ec; }
+.portal-news-title { margin: 0 0 8px; font-size: 17px; line-height: 1.35; }
+.portal-news-title a { color: #1f5f99; text-decoration: none; }
+.portal-news-title a:hover { color: #17233f; text-decoration: underline; }
+.portal-news-meta { display: flex; gap: 10px; font-size: 12px; color: #78828d; margin-bottom: 10px; }
+.portal-news-excerpt { margin: 0 0 12px; font-size: 14px; line-height: 1.55; color: #4b5562; flex: 1; }
+.portal-news-more { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: #1f5f99; text-decoration: none; align-self: flex-start; }
+.portal-news-more:hover { color: #17233f; }
 .portal-main, .portal-sidebar { display: flex; flex-direction: column; gap: 16px; }
 .portal-card { overflow: hidden; border-radius: var(--portal-radius); background: #fff; box-shadow: var(--portal-shadow); }
 .portal-card-title { padding: 15px 18px; border-bottom: 1px solid #e7e9ec; }
@@ -60,10 +72,12 @@
 .portal-empty { padding: 18px; color: #7d8791; }
 @media (max-width: 850px) {
     .portal-grid { grid-template-columns: 1fr; }
+    .portal-news-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 640px) {
     .portal-stats { grid-template-columns: 1fr; }
     .portal-forums { grid-template-columns: 1fr; }
     .portal-topic { flex-direction: column; }
     .portal-topic-meta { min-width: 0; align-items: flex-start; }
+    .portal-news-grid { grid-template-columns: 1fr; }
 }

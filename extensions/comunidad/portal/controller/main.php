@@ -36,6 +36,7 @@ class main
     {
         $this->user->add_lang_ext('comunidad/portal', 'common');
 
+        $this->assign_news();
         $this->assign_recent_topics(8);
         $this->assign_popular_topics(5);
         $this->assign_new_members(6);
@@ -53,9 +54,69 @@ class main
             'U_SEARCH_UNANSWERED'=> append_sid("{$this->root_path}search.{$this->php_ext}", 'search_id=unanswered'),
             'U_MEMBERLIST'       => append_sid("{$this->root_path}memberlist.{$this->php_ext}"),
             'S_USER_LOGGED_IN'   => $this->user->data['user_id'] != ANONYMOUS,
+            'S_NEWS_ENABLED'     => (int) $this->config['portal_news_forum_id'] > 0,
         ]);
 
         return $this->helper->render('portal_body.html', $this->user->lang('PORTAL'));
+    }
+
+    protected function assign_news()
+    {
+        $forum_id = isset($this->config['portal_news_forum_id']) ? (int) $this->config['portal_news_forum_id'] : 0;
+        if ($forum_id === 0) {
+            return;
+        }
+
+        $limit = isset($this->config['portal_news_limit']) ? (int) $this->config['portal_news_limit'] : 3;
+        if ($limit < 1) {
+            $limit = 1;
+        } elseif ($limit > 10) {
+            $limit = 10;
+        }
+
+        $sql = 'SELECT t.topic_id, t.forum_id, t.topic_title, t.topic_time,
+                       t.topic_poster, t.topic_first_poster_name, t.topic_first_poster_colour,
+                       p.post_id, p.post_text, p.bbcode_uid
+                FROM ' . TOPICS_TABLE . ' t
+                JOIN ' . POSTS_TABLE . ' p ON p.post_id = t.topic_first_post_id
+                WHERE t.forum_id = ' . (int) $forum_id . '
+                  AND t.topic_visibility = 1
+                ORDER BY t.topic_time DESC';
+        $result = $this->db->sql_query_limit($sql, $limit);
+
+        $count = 0;
+        while ($row = $this->db->sql_fetchrow($result)) {
+            if (!$this->auth->acl_get('f_read', (int) $row['forum_id'])) {
+                continue;
+            }
+
+            $this->template->assign_block_vars('news', [
+                'TITLE'      => censor_text($row['topic_title']),
+                'AUTHOR'     => get_username_string('full', (int) $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
+                'DATE'       => $this->user->format_date($row['topic_time']),
+                'EXCERPT'    => $this->excerpt_from_post($row['post_text'], $row['bbcode_uid']),
+                'U_TOPIC'    => append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'f=' . (int) $row['forum_id'] . '&amp;t=' . (int) $row['topic_id']),
+            ]);
+            $count++;
+        }
+        $this->db->sql_freeresult($result);
+
+        $this->template->assign_var('S_NEWS_HAS_CONTENT', $count > 0);
+    }
+
+    protected function excerpt_from_post($text, $uid, $max_chars = 240)
+    {
+        strip_bbcode($text, $uid);
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = preg_replace('/\s+/u', ' ', $text);
+        $text = trim($text);
+        if ($text === '') {
+            return '';
+        }
+        if (mb_strlen($text) > $max_chars) {
+            $text = mb_substr($text, 0, $max_chars - 1) . '…';
+        }
+        return $text;
     }
 
     protected function assign_recent_topics($limit)
