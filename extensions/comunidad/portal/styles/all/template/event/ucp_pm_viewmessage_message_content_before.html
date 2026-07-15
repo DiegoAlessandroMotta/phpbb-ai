@@ -2,10 +2,10 @@
 <!-- IF S_PORTAL_ASSISTANT_ENABLED -->
 <div class="portal-assistant" id="portal-assistant-pm"
 	 data-endpoint="{U_PORTAL_ASSISTANT_ENDPOINT}"
-	 data-token="{PORTAL_ASSISTANT_FORM_TOKEN}"
 	 data-surface="pm"
 	 data-remaining="{PORTAL_ASSISTANT_REMAINING}"
 	 data-limit="{PORTAL_ASSISTANT_LIMIT}">
+	{S_FORM_TOKEN_PORTAL_ASSISTANT}
 
 	<div class="portal-assistant-bar">
 		<span class="portal-assistant-label">{L_PORTAL_ASSISTANT_LABEL}</span>
@@ -44,7 +44,10 @@
 	var copyBtn    = document.getElementById('portal-assistant-copy-pm');
 	var closeBtn   = document.getElementById('portal-assistant-close-pm');
 	var endpoint   = root.getAttribute('data-endpoint');
-	var token      = root.getAttribute('data-token');
+	var tokenInput = root.querySelector('input[name="form_token"]');
+	var timeInput  = root.querySelector('input[name="creation_time"]');
+	var token      = tokenInput ? tokenInput.value : '';
+	var creation   = timeInput  ? timeInput.value  : '';
 	var limit      = parseInt(root.getAttribute('data-limit') || '0', 10);
 	var messageEl  = document.querySelector('.postbody') || document.querySelector('.content');
 	var btns       = root.querySelectorAll('.portal-assistant-btn');
@@ -74,7 +77,7 @@
 				'X-Requested-With': 'XMLHttpRequest'
 			},
 			credentials: 'same-origin',
-			body: 'action=' + encodeURIComponent(action) + '&text=' + encodeURIComponent(text) + '&form_token=' + encodeURIComponent(token)
+			body: 'action=' + encodeURIComponent(action) + '&text=' + encodeURIComponent(text) + '&form_token=' + encodeURIComponent(token) + '&creation_time=' + encodeURIComponent(creation)
 		}).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
 		.then(function (res) {
 			if (res.j && res.j.ok) {

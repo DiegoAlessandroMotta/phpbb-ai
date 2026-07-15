@@ -74,7 +74,7 @@ class assistant_listener implements EventSubscriberInterface
 
 	private function assignCommonVars(): void
 	{
-		add_form_key('portal_assistant');
+		add_form_key('portal_assistant', '_PORTAL_ASSISTANT');
 
 		$enabled  = !empty($this->config['portal_assistant_enabled']);
 		$ready    = $this->llm->is_configured();
@@ -91,7 +91,6 @@ class assistant_listener implements EventSubscriberInterface
 			'PORTAL_ASSISTANT_LIMIT'        => $limit,
 			'PORTAL_ASSISTANT_USED'         => $used,
 			'U_PORTAL_ASSISTANT_ENDPOINT'   => $this->helper->route('comunidad_portal_assistant'),
-			'PORTAL_ASSISTANT_FORM_TOKEN'   => get_form_token('portal_assistant'),
 		]);
 	}
 }
