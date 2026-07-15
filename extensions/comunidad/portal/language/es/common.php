@@ -4,10 +4,10 @@ if (!defined('IN_PHPBB')) {
 }
 
 $lang = array_merge($lang, [
-    'PORTAL' => 'Portal comunitario',
+    'PORTAL' => 'Pulso',
     'PORTAL_HOME' => 'Portal',
-    'PORTAL_WELCOME' => 'Bienvenido a nuestra comunidad',
-    'PORTAL_WELCOME_TEXT' => 'Participa, comparte conocimiento y mantente al día con las novedades de la comunidad.',
+    'PORTAL_WELCOME' => 'Al pulso de lo que pasa',
+    'PORTAL_WELCOME_TEXT' => 'Compartí eventos, novedades y avisos que importan a la comunidad. Enterate y avisale a los demás.',
     'PORTAL_ENTER_FORUM' => 'Entrar al foro',
     'PORTAL_ACTIVE_TOPICS' => 'Temas activos',
     'PORTAL_UNANSWERED' => 'Sin respuesta',
