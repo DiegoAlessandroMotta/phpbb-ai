@@ -12,11 +12,15 @@
 #      named volumes and bind-mounts both work.
 #   2. Bootstrap: if .bootstrapped isn't present, run the CLI
 #      installer with a config built from envsubst'd install-config
-#      template. The installer writes its own config.php; we then
-#      overwrite that with our env-var driven version (from
-#      /etc/phpbb/config.php) so the runtime config is 12-factor.
-#      After it succeeds, remove the install/ directory (security)
-#      and write the marker so subsequent boots are a no-op.
+#      template. The installer writes its own config.php; phase 2.5
+#      overwrites that with the env-var driven version. After it
+#      succeeds, remove the install/ directory (security) and write
+#      the marker so subsequent boots skip this phase.
+#   2.5. Always-sync config.php: on EVERY container start, overwrite
+#      /var/www/html/config.php from /etc/phpbb/config.php (the env-
+#      var driven source). This is what makes changes in .env take
+#      effect on restart — without it, the bind-mount snapshot from
+#      the first run would mask the new env values.
 #   3. Chown: make sure the doc root belongs to www-data.
 #   4. Hand off to the base image's entrypoint (starts Apache).
 
@@ -76,14 +80,6 @@ if [ ! -f /var/www/html/.bootstrapped ] && [ -f /etc/phpbb/install-config.yml.te
         echo "[entrypoint] CLI installer FAILED (exit $install_exit). Leaving install/ in place for debugging. NOT marking as bootstrapped — next boot will retry."
         exit 1
     fi
-    # The installer just wrote its own config.php. Replace it with
-    # the env-var driven one (staged at /etc/phpbb/config.php). The
-    # DB schema is already populated, so the runtime config is the
-    # one that matters for subsequent requests.
-    if [ -f /etc/phpbb/config.php ]; then
-        cp /etc/phpbb/config.php /var/www/html/config.php
-        echo "[entrypoint] Replaced installer config.php with env-var driven version."
-    fi
     # Remove the web/CLI installer directory. It must NOT be
     # reachable from a browser in prod — phpBB does not auto-delete
     # it after install.
@@ -93,6 +89,22 @@ if [ ! -f /var/www/html/.bootstrapped ] && [ -f /etc/phpbb/install-config.yml.te
     # a named volume (prod) or a bind-mount (dev).
     touch /var/www/html/.bootstrapped
     echo "[entrypoint] Bootstrap complete."
+fi
+
+# --- 2.5. Always sync config.php from the env-var driven source --------
+# The env-var driven config.php staged at /etc/phpbb is the source of
+# truth for runtime config. We overwrite /var/www/html/config.php on
+# EVERY container start so that:
+#   - On first boot, it wins over the installer's own config.php.
+#   - On subsequent boots, the bind-mount snapshot from the first run
+#     is replaced with the current env-var driven file, so changes in
+#     .env take effect on the next restart (the bind-mount would
+#     otherwise mask them).
+# This intentionally discards manual edits to config.php — env vars
+# are the only supported way to change phpBB config.
+if [ -f /etc/phpbb/config.php ]; then
+    cp /etc/phpbb/config.php /var/www/html/config.php
+    echo "[entrypoint] Synced config.php from env-var driven source."
 fi
 
 # --- 3. Chown ----------------------------------------------------------
