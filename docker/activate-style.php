@@ -61,15 +61,19 @@ if ($copyright === '') {
     $copyright = $style_name;
 }
 
-// 2) Look up parent style_id (for style_parent_id)
+// 2) Look up parent style_id, path, and parent_tree (for style_parent_id and style_parent_tree)
 $parent_id = 0;
+$parent_path = $parent_name; // convention: path matches dir name
+$parent_tree = '';
 $parent_bbc = "\\x2f\\x2f\\x67\\x3d\\x00"; // prosilver default: "//g=" + null
-if ($stmt = $mysqli->prepare("SELECT style_id, bbcode_bitfield FROM {$styles_tbl} WHERE style_name = ? OR style_path = ? LIMIT 1")) {
+if ($stmt = $mysqli->prepare("SELECT style_id, style_path, style_parent_tree, bbcode_bitfield FROM {$styles_tbl} WHERE style_name = ? OR style_path = ? LIMIT 1")) {
     $stmt->bind_param('ss', $parent_name, $parent_name);
     $stmt->execute();
-    $stmt->bind_result($pid, $pbbc);
+    $stmt->bind_result($pid, $ppath, $ptree, $pbbc);
     if ($stmt->fetch()) {
         $parent_id = (int) $pid;
+        $parent_path = $ppath;
+        $parent_tree = $ptree ?? '';
         $parent_bbc = $pbbc;
     }
     $stmt->close();
@@ -88,14 +92,20 @@ if ($stmt = $mysqli->prepare("SELECT style_id FROM {$styles_tbl} WHERE style_pat
 }
 
 if ($style_id === 0) {
-    // parent_tree is a JSON-ish text column in phpBB: comma-separated style ids
-    $parent_tree = $parent_id > 0 ? '["' . $parent_id . '"]' : '';
+    // style_parent_tree is a /-separated path string (e.g. '/prosilver' or
+    // '/prosilver/digi'). phpBB's twig.php does explode('/', ...) on it to
+    // build the template resolution chain. See acp_styles.php:520 for the
+    // canonical formula.
+    $my_parent_tree = '';
+    if ($parent_id > 0) {
+        $my_parent_tree = ($parent_tree !== '' ? $parent_tree . '/' : '') . $parent_path;
+    }
     $sql = "INSERT INTO {$styles_tbl}
         (style_name, style_copyright, style_active, style_path,
          bbcode_bitfield, style_parent_id, style_parent_tree)
         VALUES (?, ?, 1, ?, ?, ?, ?)";
     if ($stmt = $mysqli->prepare($sql)) {
-        $stmt->bind_param('ssssis', $style_name, $copyright, $style_path, $parent_bbc, $parent_id, $parent_tree);
+        $stmt->bind_param('ssssis', $style_name, $copyright, $style_path, $parent_bbc, $parent_id, $my_parent_tree);
         if (!$stmt->execute()) {
             fwrite(STDERR, "[activate-style] INSERT failed: {$stmt->error}\n");
             $stmt->close();
@@ -111,7 +121,34 @@ if ($style_id === 0) {
     }
     echo "[activate-style] Registered style '{$style_name}' as id={$style_id}\n";
 } else {
-    echo "[activate-style] Style '{$style_name}' already registered (id={$style_id})\n";
+    // Repair: older versions of this script wrote style_parent_tree as a
+    // JSON-looking string ('["1"]') into this TEXT column. phpBB reads it
+    // as a /-separated path, so the value must be repaired in-place when
+    // it doesn't start with '/'. Idempotent.
+    $expected_tree = '';
+    if ($parent_id > 0) {
+        $expected_tree = ($parent_tree !== '' ? $parent_tree . '/' : '') . $parent_path;
+    }
+    $current_tree = '';
+    if ($stmt = $mysqli->prepare("SELECT style_parent_tree FROM {$styles_tbl} WHERE style_id = ?")) {
+        $stmt->bind_param('i', $style_id);
+        $stmt->execute();
+        $stmt->bind_result($ctree);
+        if ($stmt->fetch()) {
+            $current_tree = $ctree ?? '';
+        }
+        $stmt->close();
+    }
+    if ($current_tree !== $expected_tree) {
+        if ($stmt = $mysqli->prepare("UPDATE {$styles_tbl} SET style_parent_tree = ?, style_parent_id = ? WHERE style_id = ?")) {
+            $stmt->bind_param('sii', $expected_tree, $parent_id, $style_id);
+            $stmt->execute();
+            $stmt->close();
+            echo "[activate-style] Repaired style_parent_tree for '{$style_name}': '{$current_tree}' -> '{$expected_tree}'\n";
+        }
+    } else {
+        echo "[activate-style] Style '{$style_name}' already registered (id={$style_id})\n";
+    }
 }
 
 // 4) Set default_style and override_user_style
