@@ -87,3 +87,10 @@ services:
             - [set_name, [cron.task.portal_extraction]]
         tags:
             - { name: cron.task }
+
+    comunidad.portal.assistant.rate_limiter:
+        class: comunidad\portal\service\assistant\RateLimiter
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%core.table_prefix%'
