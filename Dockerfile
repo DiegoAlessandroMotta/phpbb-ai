@@ -102,6 +102,11 @@ RUN chmod +x /usr/local/bin/phpbb-entrypoint.sh
 # PHPBB_DEFAULT_STYLE is set. See docker/activate-style.php.
 COPY docker/activate-style.php /etc/phpbb/activate-style.php
 
+# Extension-state checker. Idempotent SQL script run by the entrypoint
+# before each extension:enable, to skip the CLI call when the extension
+# is already on. See docker/check-ext-enabled.php.
+COPY docker/check-ext-enabled.php /etc/phpbb/check-ext-enabled.php
+
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/phpbb-entrypoint.sh"]

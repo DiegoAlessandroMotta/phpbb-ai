@@ -148,10 +148,13 @@ fi
 
 # --- 2.7. Enable extensions declared in PHPBB_EXTENSIONS -------------
 # Comma-separated list of vendor/ext names (e.g. "comunidad/portal").
-# Runs `phpbbcli.php extension:enable` for each, as www-data. The
-# command is idempotent — enabling an already-enabled extension is a
-# no-op. Failures are logged but do NOT abort the entrypoint: the
-# user can fix the config and restart.
+# phpbbcli.php extension:enable returns exit 1 when the extension is
+# already enabled, so we first check the phpbb_ext table directly
+# (docker/check-ext-enabled.php) and skip the CLI call when there's
+# nothing to do. This makes the phase truly idempotent and keeps the
+# boot log clean on every restart. Failures from a real enable
+# attempt are logged but do NOT abort the entrypoint: the user can
+# fix the config and restart.
 if [ -n "${PHPBB_EXTENSIONS:-}" ]; then
     # cache/ must be writable by www-data before the CLI runs.
     mkdir -p /var/www/html/cache
@@ -163,6 +166,23 @@ if [ -n "${PHPBB_EXTENSIONS:-}" ]; then
         IFS="$OLD_IFS"
         ext=$(printf '%s' "$ext" | tr -d '[:space:]')
         [ -z "$ext" ] && continue
+        # Skip the CLI call if the extension is already enabled.
+        # exit 0 = enabled, 1 = not enabled, anything else = error.
+        set +e
+        check_output=$(php /etc/phpbb/check-ext-enabled.php "$ext" 2>&1)
+        check_exit=$?
+        set -e
+        if [ $check_exit -eq 0 ]; then
+            echo "[entrypoint] Extension already enabled: $ext"
+            IFS=','
+            continue
+        elif [ $check_exit -ne 1 ]; then
+            # Real error (DB connection, etc). Log it but still try
+            # the CLI — better to attempt the enable than to silently
+            # skip it.
+            echo "[entrypoint] WARNING: could not check '$ext' state (exit $check_exit)."
+            echo "$check_output" | sed 's/^/[entrypoint]   /'
+        fi
         set +e
         output=$(su www-data -s /bin/sh -c "cd /var/www/html && php bin/phpbbcli.php extension:enable '$ext' 2>&1")
         enable_exit=$?
