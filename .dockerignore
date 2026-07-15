@@ -1,0 +1,33 @@
+# Build context exclusions — keep the image lean and the cache clean.
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Bind-mount dir (in dev). NOT shipped to the image; the image bakes
+# phpBB from a fresh download in the Dockerfile.
+html/
+data/
+
+# Git metadata
+.git/
+.gitignore
+.gitattributes
+
+# mkcert certs and keys
+docker/caddy/certs/*
+!docker/caddy/certs/.gitkeep
+
+# Editor / OS junk
+.atl/
+.temp/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AI tooling
+.codegraph/
+opencode.json
+opencode.jsonc

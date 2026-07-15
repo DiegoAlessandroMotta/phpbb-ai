@@ -1,0 +1,99 @@
+# Dev override for the phpBB stack.
+# Use with:  docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Adds:
+#   * a local MariaDB (no external DB needed).
+#   * Caddy reverse proxy with mkcert TLS at https://forum.local.
+#   * bind-mount ./html so you can edit phpBB code in your editor.
+#
+# Anything not redefined here inherits from docker-compose.yml —
+# compose merges service definitions on the same name; new services
+# are added on top.
+
+services:
+  phpbb:
+    container_name: forum-app
+    # Direct port to the container for debugging (bypass Caddy).
+    # Comment out if you only want to go through the proxy.
+    ports:
+      - "${PHPBB_HTTP_PORT:-8000}:80"
+    environment:
+      # In dev, Caddy fronts phpBB over HTTPS, so we tell phpBB the
+      # same thing it sees in prod: HTTPS + behind a reverse proxy.
+      PHPBB_WEB_HOST: ${PHPBB_WEB_HOST:-forum.local}
+      PHPBB_WEB_PROTOCOL: ${PHPBB_WEB_PROTOCOL:-https}
+      PHPBB_BEHIND_PROXY: "1"
+      PHPBB_DB_HOST: db
+      # Verbose debug output. Set to "0" (or unset) for prod-like
+      # silent behaviour.
+      PHPBB_DEBUG: "1"
+    # Bind-mount the doc root so phpBB files are visible + editable
+    # in your editor at ./html/. The entrypoint copies the staged
+    # source into ./html on first boot only.
+    volumes:
+      - ./html:/var/www/html
+      - ./docker/php/zz-phpbb.ini:/usr/local/etc/php/conf.d/zz-phpbb.ini:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - forum-net
+
+  db:
+    image: mariadb:10.11
+    container_name: forum-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${PHPBB_DB_NAME:-phpbb}
+      MARIADB_USER: ${PHPBB_DB_USER:-phpbb}
+      MARIADB_PASSWORD: ${PHPBB_DB_PASSWORD:-phpbb}
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_bin
+      - --innodb_file_per_table=On
+      - --wait-timeout=28800
+      - --skip-log-bin
+    ports:
+      - "${PHPBB_DB_PORT:-3306}:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      # MariaDB's bundled healthcheck: pings the server, returns 0
+      # only after InnoDB has finished initialising.
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - forum-net
+
+  caddy:
+    image: caddy:2
+    container_name: forum-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # mkcert-generated certs. Drop them in ./docker/caddy/certs/
+      # with the names: forum.local.pem and forum.local-key.pem
+      # (or whatever PHPBB_WEB_HOST is set to).
+      - ./docker/caddy/certs:/etc/caddy/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - phpbb
+    networks:
+      - forum-net
+
+volumes:
+  dbdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  forum-net:
+    driver: bridge

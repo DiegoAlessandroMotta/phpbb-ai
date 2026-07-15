@@ -1,0 +1,48 @@
+# Production / demo phpBB stack. Designed to be deployable as-is to
+# Dokploy (or any platform that injects env vars + a managed DB).
+# For local development, use the dev override:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# In Dokploy:
+#   1. Set env vars in the project's "Environment" tab (no .env in prod).
+#   2. Provision a database in the "Database" tab; paste its host,
+#      port, name, user, password into PHPBB_DB_* env vars.
+#   3. Traefik labels + the external network are added by Dokploy
+#      automatically; we don't declare them here.
+
+services:
+  phpbb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.3}
+        PHPBB_VERSION: ${PHPBB_VERSION:-3.3.17}
+    image: wiki-forum:${PHPBB_IMAGE_TAG:-3.3.17}
+    restart: unless-stopped
+    environment:
+      PHPBB_DBMS: ${PHPBB_DB_TYPE:-mysqli}
+      PHPBB_DB_HOST: ${PHPBB_DB_HOST}
+      PHPBB_DB_PORT: ${PHPBB_DB_PORT:-3306}
+      PHPBB_DB_NAME: ${PHPBB_DB_NAME}
+      PHPBB_DB_USER: ${PHPBB_DB_USER}
+      PHPBB_DB_PASSWORD: ${PHPBB_DB_PASSWORD}
+      PHPBB_WEB_HOST: ${PHPBB_WEB_HOST}
+      PHPBB_WEB_PROTOCOL: ${PHPBB_WEB_PROTOCOL:-https}
+      PHPBB_BEHIND_PROXY: "1"
+      PHPBB_DEBUG: "0"
+      PHPBB_INSTALLED: "1"
+    volumes:
+      # Persistent app state: attachments, cache, sessions, config.php.
+      # Back this up — it's the only stateful piece.
+      - phpbb_data:/var/www/html
+      - ./docker/php/zz-phpbb.ini:/usr/local/etc/php/conf.d/zz-phpbb.ini:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  phpbb_data:

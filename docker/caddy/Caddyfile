@@ -1,0 +1,26 @@
+# Caddyfile for the dev override.
+#
+# If you change PHPBB_WEB_HOST in .env, update the site name below
+# AND the cert filenames in ./docker/caddy/certs/ to match.
+#
+# Generate certs once on the host with mkcert:
+#   mkcert -cert-file docker/caddy/certs/forum.local.pem \
+#          -key-file  docker/caddy/certs/forum.local-key.pem forum.local
+# Then add to /etc/hosts:
+#   127.0.0.1 forum.local
+
+# HTTP -> HTTPS redirect for any host that hits us on :80.
+http://*:80 {
+	redir https://{host}{uri} permanent
+}
+
+# HTTPS site. We pass explicit cert paths, which disables Caddy's
+# auto-https (and its internal CA) for this site — required for
+# mkcert certs to be picked up.
+forum.local {
+	tls /etc/caddy/certs/forum.local.pem /etc/caddy/certs/forum.local-key.pem
+	reverse_proxy phpbb:80 {
+		header_up X-Forwarded-Proto https
+		header_up X-Real-IP {remote_host}
+	}
+}

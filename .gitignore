@@ -1,0 +1,18 @@
+.atl
+.codegraph
+.temp
+opencode.json
+opencode.jsonc
+
+# Local env / secrets
+.env
+.env.*
+!.env.example
+
+# Bind-mount targets in dev
+html/
+data/
+
+# mkcert certs and keys (keep the dir via .gitkeep, ignore contents)
+docker/caddy/certs/*
+!docker/caddy/certs/.gitkeep
