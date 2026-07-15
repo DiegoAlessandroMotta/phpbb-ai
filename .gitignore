@@ -19,3 +19,4 @@ html/.bootstrapped
 # mkcert certs and keys (keep the dir via .gitkeep, ignore contents)
 docker/caddy/certs/*
 !docker/caddy/certs/.gitkeep
+.temp
