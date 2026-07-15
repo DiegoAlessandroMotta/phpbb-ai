@@ -33,3 +33,33 @@ services:
         class: comunidad\portal\service\llm\GeminiClient
         arguments:
             - '@config'
+
+    comunidad.portal.extraction.service:
+        class: comunidad\portal\service\extraction\EntityExtractionService
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@comunidad.portal.llm.client'
+            - '%core.table_prefix%'
+
+    comunidad.portal.listener.posting:
+        class: comunidad\portal\event\posting_listener
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%core.table_prefix%'
+        tags:
+            - { name: event.listener }
+
+    comunidad.portal.cron.task.extraction:
+        class: comunidad\portal\cron\extract_news_entities
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@log'
+            - '@comunidad.portal.extraction.service'
+            - '%core.table_prefix%'
+        calls:
+            - [set_name, [cron.task.portal_extraction]]
+        tags:
+            - { name: cron.task }

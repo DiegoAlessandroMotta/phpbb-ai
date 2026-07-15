@@ -14,6 +14,14 @@ namespace comunidad\portal\service\llm;
 interface LlmClient
 {
 	/**
+	 * True if the provider has everything it needs to make a call
+	 * (API key set, credentials loaded, model available). Callers
+	 * should skip work when this returns false rather than relying
+	 * on a downstream error.
+	 */
+	public function is_configured(): bool;
+
+	/**
 	 * Send a structured-extraction request to the LLM and return
 	 * the parsed response.
 	 *
