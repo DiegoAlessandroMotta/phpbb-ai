@@ -197,6 +197,15 @@ ol ol ul, ol ul ul, ul ol ul, ul ul ul {
   .logo:hover {
     text-decoration: none; }
 
+.logo-svg {
+  display: block;
+  width: 150px;
+  height: 36px;
+  max-width: 100%;
+  color: #f5f7fa; }
+  .logo-svg .logo-accent { fill: #1f5f99; }
+  .logo-svg .logo-text { fill: currentColor; }
+
 .site-description h1, .site-description p.sitename {
   margin-left: 0;
   margin-right: 0; }

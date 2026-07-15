@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" role="img" aria-label="Pulso">
+  <title>Pulso</title>
+  <g class="logo-mark">
+    <circle class="logo-accent" cx="16" cy="24" r="9"/>
+  </g>
+  <text class="logo-text" x="34" y="32"
+        font-family="'Plus Jakarta Sans','Inter','Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif"
+        font-weight="700" font-size="30" letter-spacing="-0.5">pulso</text>
+</svg>

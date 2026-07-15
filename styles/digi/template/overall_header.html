@@ -88,8 +88,12 @@
 			<div class="inner">
 
 			<div id="site-description" class="site-description">
-				<a id="logo" class="logo" href="{% if U_SITE_HOME %}{{ U_SITE_HOME }}{% else %}{{ U_INDEX }}{% endif %}" title="{% if U_SITE_HOME %}{{ L_SITE_HOME }}{% else %}{{ L_INDEX }}{% endif %}">
-					<img src="{T_THEME_PATH}/images/logo.png" data-src-hd="{T_THEME_PATH}/images/logo_hd.png" alt="{SITENAME}"/>
+				<a id="logo" class="logo" href="{% if U_SITE_HOME %}{{ U_SITE_HOME }}{% else %}{{ U_INDEX }}{% endif %}" title="{% if U_SITE_HOME %}{{ L_SITE_HOME }}{% else %}{{ L_INDEX }}{% endif %}" aria-label="Pulso">
+					<svg class="logo-svg" viewBox="0 0 200 48" role="img" aria-label="Pulso">
+						<title>Pulso</title>
+						<circle class="logo-accent" cx="16" cy="24" r="9"/>
+						<text class="logo-text" x="34" y="32" font-family="'Plus Jakarta Sans','Inter','Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-weight="700" font-size="30" letter-spacing="-0.5">pulso</text>
+					</svg>
 				</a>
 				<p class="sitename">{SITENAME}</p>
 				<p>{SITE_DESCRIPTION}</p>
