@@ -61,7 +61,7 @@ class main
     protected function assign_recent_topics($limit)
     {
         $sql = 'SELECT t.topic_id, t.forum_id, t.topic_title, t.topic_time,
-                       t.topic_last_post_time, t.topic_replies, t.topic_views,
+                       t.topic_last_post_time, (t.topic_posts_approved - 1) AS topic_replies, t.topic_views,
                        t.topic_last_poster_name, f.forum_name
                 FROM ' . TOPICS_TABLE . ' t
                 JOIN ' . FORUMS_TABLE . ' f ON f.forum_id = t.forum_id
@@ -91,12 +91,13 @@ class main
 
     protected function assign_popular_topics($limit)
     {
-        $sql = 'SELECT t.topic_id, t.forum_id, t.topic_title, t.topic_replies, t.topic_views
+        $sql = 'SELECT t.topic_id, t.forum_id, t.topic_title,
+                       (t.topic_posts_approved - 1) AS topic_replies, t.topic_views
                 FROM ' . TOPICS_TABLE . ' t
                 JOIN ' . FORUMS_TABLE . ' f ON f.forum_id = t.forum_id
                 WHERE t.topic_visibility = 1
                   AND f.forum_type = ' . FORUM_POST . '
-                ORDER BY t.topic_views DESC, t.topic_replies DESC';
+                ORDER BY t.topic_views DESC, (t.topic_posts_approved - 1) DESC';
         $result = $this->db->sql_query_limit($sql, $limit);
 
         while ($row = $this->db->sql_fetchrow($result)) {
