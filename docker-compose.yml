@@ -23,7 +23,12 @@ services:
     environment:
       PHPBB_DBMS: ${PHPBB_DB_TYPE:-mysqli}
       PHPBB_DB_HOST: ${PHPBB_DB_HOST}
-      PHPBB_DB_PORT: ${PHPBB_DB_PORT:-3306}
+      # In-container DB port. phpBB connects over the compose network
+      # where MariaDB listens on 3306, regardless of the host port we
+      # expose with `ports:` below. The host port (PHPBB_DB_PORT in
+      # .env) is ONLY for the host->container mapping — never pass it
+      # to phpBB.
+      PHPBB_DB_PORT: 3306
       PHPBB_DB_NAME: ${PHPBB_DB_NAME}
       PHPBB_DB_USER: ${PHPBB_DB_USER}
       PHPBB_DB_PASSWORD: ${PHPBB_DB_PASSWORD}
