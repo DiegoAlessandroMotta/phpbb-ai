@@ -11,6 +11,8 @@
  * Modes:
  *   - news       (default) — portal news block config
  *   - extraction           — entity extraction list + re-extraer
+ *   - assistant            — writing-assistant sub-page (kill switch,
+ *                            rate limit, input cap, max output tokens)
  *
  * @package comunidad\portal
  */
@@ -30,6 +32,21 @@ class main_module
 	public function main($id, $mode)
 	{
 		global $phpbb_container, $request, $user;
+
+		if ($mode === 'assistant') {
+			$this->tpl_name    = 'acp_assistant';
+			$this->page_title  = 'ACP_PORTAL_ASSISTANT';
+
+			$controller = $phpbb_container->get('comunidad.portal.acp.assistant.controller');
+			$controller->set_page_url($this->u_action);
+
+			if ($request->is_set_post('submit')) {
+				$controller->save_options();
+			}
+
+			$controller->display_options();
+			return;
+		}
 
 		if ($mode === 'extraction') {
 			$this->tpl_name    = 'acp_extraction';

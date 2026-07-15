@@ -1,0 +1,71 @@
+<!-- INCLUDE overall_header.html -->
+
+<a id="maincontent"></a>
+
+<h1>{L_ACP_PORTAL_ASSISTANT}</h1>
+
+<p>{L_ACP_PORTAL_ASSISTANT_EXPLAIN}</p>
+
+<form id="acp_portal_assistant" method="post" action="{U_ACTION}">
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_ASSISTANT_STATUS}</legend>
+	<dl>
+		<dt><label for="portal_assistant_enabled">{L_ACP_PORTAL_ASSISTANT_ENABLED}</label><br><span class="explain">{L_ACP_PORTAL_ASSISTANT_ENABLED_EXPLAIN}</span></dt>
+		<dd>
+			<label><input type="radio" class="radio" name="portal_assistant_enabled" value="1"<!-- IF S_ASSISTANT_ENABLED --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+			<label><input type="radio" class="radio" name="portal_assistant_enabled" value="0"<!-- IF not S_ASSISTANT_ENABLED --> checked="checked"<!-- ENDIF --> /> {L_NO}</label>
+		</dd>
+	</dl>
+	<dl>
+		<dt><label>{L_ACP_PORTAL_ASSISTANT_LLM}</label></dt>
+		<dd>
+			<!-- IF S_LLM_KEY_SET -->
+				<strong>{L_ACP_PORTAL_EXTRACTION_CONFIGURED}</strong>
+			<!-- ELSE -->
+				<span class="error">{L_ACP_PORTAL_EXTRACTION_NOT_CONFIGURED}</span>
+			<!-- ENDIF -->
+			&mdash; {L_ACP_PORTAL_EXTRACTION_MODEL}: <code>{PORTAL_AI_GEMINI_MODEL}</code>
+			<br><span class="explain">{L_ACP_PORTAL_ASSISTANT_LLM_EXPLAIN}</span>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_ASSISTANT_LIMITS}</legend>
+	<dl>
+		<dt><label for="portal_assistant_max_per_hour">{L_ACP_PORTAL_ASSISTANT_MAX_PER_HOUR}</label><br><span class="explain">{L_ACP_PORTAL_ASSISTANT_MAX_PER_HOUR_EXPLAIN}</span></dt>
+		<dd><input type="number" min="1" max="1000" name="portal_assistant_max_per_hour" id="portal_assistant_max_per_hour" value="{PORTAL_ASSISTANT_MAX_PER_HOUR}" size="6" /></dd>
+	</dl>
+	<dl>
+		<dt><label for="portal_assistant_input_cap">{L_ACP_PORTAL_ASSISTANT_INPUT_CAP}</label><br><span class="explain">{L_ACP_PORTAL_ASSISTANT_INPUT_CAP_EXPLAIN}</span></dt>
+		<dd><input type="number" min="100" max="100000" name="portal_assistant_input_cap" id="portal_assistant_input_cap" value="{PORTAL_ASSISTANT_INPUT_CAP}" size="6" /></dd>
+	</dl>
+	<dl>
+		<dt><label for="portal_assistant_max_output_tokens">{L_ACP_PORTAL_ASSISTANT_MAX_OUTPUT_TOKENS}</label><br><span class="explain">{L_ACP_PORTAL_ASSISTANT_MAX_OUTPUT_TOKENS_EXPLAIN}</span></dt>
+		<dd><input type="number" min="50" max="8000" name="portal_assistant_max_output_tokens" id="portal_assistant_max_output_tokens" value="{PORTAL_ASSISTANT_MAX_OUTPUT_TOKENS}" size="6" /></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_ASSISTANT_STATS}</legend>
+	<dl>
+		<dt><label>{L_ACP_PORTAL_ASSISTANT_REQUESTS_24H}</label></dt>
+		<dd>{PORTAL_ASSISTANT_REQUESTS_24H}</dd>
+	</dl>
+	<dl>
+		<dt><label>{L_ACP_PORTAL_ASSISTANT_REQUESTS_7D}</label></dt>
+		<dd>{PORTAL_ASSISTANT_REQUESTS_7D}</dd>
+	</dl>
+	<dl>
+		<dt><label>{L_ACP_PORTAL_ASSISTANT_TOKENS_24H}</label></dt>
+		<dd>{PORTAL_ASSISTANT_TOKENS_24H_PROMPT} / {PORTAL_ASSISTANT_TOKENS_24H_COMPLETION}</dd>
+	</dl>
+</fieldset>
+
+<p class="submit-buttons">
+	<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />
+</p>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

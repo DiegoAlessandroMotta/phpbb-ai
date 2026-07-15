@@ -33,6 +33,20 @@ services:
             - '%core.php_ext%'
             - '%core.table_prefix%'
 
+    comunidad.portal.acp.assistant.controller:
+        class: comunidad\portal\controller\acp_assistant
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '@comunidad.portal.llm.client'
+            - '@comunidad.portal.assistant.rate_limiter'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '%core.table_prefix%'
+
     comunidad.portal.listener:
         class: comunidad\portal\event\main_listener
         arguments:
