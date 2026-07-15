@@ -37,6 +37,10 @@ services:
       # Back this up — it's the only stateful piece.
       - phpbb_data:/var/www/html
       - ./docker/php/zz-phpbb.ini:/usr/local/etc/php/conf.d/zz-phpbb.ini:ro
+      # Install-config template. envsubst's at first boot to produce
+      # the YAML the CLI installer reads. Mounted :ro — the rendered
+      # file goes to /tmp/.
+      - ./install-config.yml.template:/etc/phpbb/install-config.yml.template:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost/ || exit 1"]
       interval: 30s

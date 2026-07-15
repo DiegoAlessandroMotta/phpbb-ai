@@ -15,6 +15,8 @@ ARG PHPBB_TARBALL_URL
 
 # Build deps for the PHP extensions phpBB needs.
 # - bzip2: required to extract the official .tar.bz2 release.
+# - gettext-base: provides envsubst, used by the entrypoint to
+#   expand ${VAR} placeholders in install-config.yml.template.
 # - libonig-dev: mbstring (occasionally missing in slim images).
 # - libzip-dev / libicu-dev: zip / intl.
 # - libpng-dev / libjpeg62-turbo-dev / libfreetype6-dev: gd
@@ -22,6 +24,7 @@ ARG PHPBB_TARBALL_URL
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bzip2 \
+        gettext-base \
         libonig-dev \
         libzip-dev \
         libicu-dev \
@@ -53,11 +56,28 @@ COPY docker/php/zz-phpbb.ini /usr/local/etc/php/conf.d/zz-phpbb.ini
 # into /var/www/html on first boot only. That makes the same image
 # work with a named volume (prod) OR a bind-mount ./html (dev)
 # without losing the source on container rebuild.
+#
+# Note: we deliberately do NOT put config.php in the staging dir.
+# The CLI installer refuses to run if a non-empty config.php is
+# present in the doc root (it thinks phpBB is already installed).
+# See docker/entrypoint.sh for the full bootstrap flow.
 RUN curl -fsSL -o /tmp/phpbb.tar.bz2 "${PHPBB_TARBALL_URL}" \
     && mkdir -p /usr/src/phpbb \
     && tar -xjf /tmp/phpbb.tar.bz2 -C /usr/src/phpbb --strip-components=1 --no-same-owner \
-    && rm /tmp/phpbb.tar.bz2 \
-    && chown -R www-data:www-data /usr/src/phpbb
+    && rm /tmp/phpbb.tar.bz2
+
+# Stage the env-var driven config.php OUTSIDE the doc root. The
+# entrypoint copies it to /var/www/html/config.php AFTER the CLI
+# installer has run and written its own version — so the end state
+# is the env-var driven file, not the installer's.
+COPY config.php /etc/phpbb/config.php
+
+# Stage the install-config.yml template. The entrypoint envsubst's
+# it on first boot to produce the real install-config.yml at /tmp/.
+COPY install-config.yml.template /etc/phpbb/install-config.yml.template
+
+# Final ownership on the staging dir.
+RUN chown -R www-data:www-data /usr/src/phpbb /etc/phpbb
 
 # Custom entrypoint. Wraps the base image's docker-php-entrypoint
 # (which is what actually starts Apache) so we can run our first-boot

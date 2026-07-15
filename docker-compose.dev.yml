@@ -33,6 +33,10 @@ services:
     volumes:
       - ./html:/var/www/html
       - ./docker/php/zz-phpbb.ini:/usr/local/etc/php/conf.d/zz-phpbb.ini:ro
+      # Install-config template. envsubst's at first boot to produce
+      # the YAML the CLI installer reads. Mounted :ro — the rendered
+      # file goes to /tmp/.
+      - ./install-config.yml.template:/etc/phpbb/install-config.yml.template:ro
     depends_on:
       db:
         condition: service_healthy

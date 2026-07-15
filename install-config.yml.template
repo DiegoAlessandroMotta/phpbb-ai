@@ -1,0 +1,52 @@
+# phpBB CLI installer template.
+# The entrypoint runs envsubst on this file to inject env vars,
+# then passes the result to `php install/phpbbcli.php install`.
+#
+# Values marked with `~` defer to config.php (which is env-var
+# driven). The YAML only carries what config.php can't express:
+# the admin user, board metadata, server protocol for the install.
+#
+# Reference: https://area51.phpbb.com/docs/dev/3.3.x/cli/getting_started
+
+installer:
+    admin:
+        name: ${PHPBB_ADMIN_NAME}
+        password: ${PHPBB_ADMIN_PASSWORD}
+        email: ${PHPBB_ADMIN_EMAIL}
+
+    board:
+        lang: ${PHPBB_BOARD_LANG}
+        name: ${PHPBB_BOARD_NAME}
+        description: ${PHPBB_BOARD_DESCRIPTION}
+
+    # DB section MUST have values — the CLI installer doesn't defer
+    # to config.php for these. config.php and the YAML both read from
+    # the same env vars, so they stay in sync.
+    #
+    # dbms: the CLI installer expects the FQCN here, but YAML plain
+    # scalars eat backslashes, so the FQCN can't be expressed
+    # unquoted. We use the short form "mysqli" — phpBB resolves it
+    # to phpbb\db\driver\mysqli internally.
+    database:
+        dbms: ${PHPBB_DBMS}
+        dbhost: ${PHPBB_DB_HOST}
+        dbport: ${PHPBB_DB_PORT}
+        dbuser: ${PHPBB_DB_USER}
+        dbpasswd: ${PHPBB_DB_PASSWORD}
+        dbname: ${PHPBB_DB_NAME}
+        table_prefix: ${PHPBB_TABLE_PREFIX}
+
+    email:
+        enabled: false
+
+    server:
+        cookie_secure: ${PHPBB_COOKIE_SECURE}
+        # PHPBB_WEB_PROTOCOL expands to "https" — the installer
+        # appends "://" to build the full server_protocol value.
+        server_protocol: ${PHPBB_WEB_PROTOCOL}://
+        force_server_vars: false
+        server_name: ${PHPBB_WEB_HOST}
+        server_port: ${PHPBB_WEB_PORT}
+        script_path: /
+
+    extensions: ['phpbb/viglink']

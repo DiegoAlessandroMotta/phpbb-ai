@@ -12,6 +12,9 @@ opencode.jsonc
 # Bind-mount targets in dev
 html/
 data/
+# Bootstrap marker written by the entrypoint after the CLI install
+# runs. Not source code — runtime state.
+html/.bootstrapped
 
 # mkcert certs and keys (keep the dir via .gitkeep, ignore contents)
 docker/caddy/certs/*
