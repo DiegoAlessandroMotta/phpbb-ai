@@ -24,6 +24,15 @@ $lang = array_merge($lang, [
     'PORTAL_LAST_POST_BY' => 'Última publicación por',
     'PORTAL_JOINED' => 'Se unió',
     'PORTAL_NO_CONTENT' => 'Todavía no hay contenido para mostrar.',
-    'PORTAL_NEWS' => 'Noticias',
-    'PORTAL_NEWS_READ_MORE' => 'Leer más',
+	'PORTAL_NEWS' => 'Noticias',
+	'PORTAL_NEWS_READ_MORE' => 'Leer más',
+
+	'PORTAL_NEWS_EXTRACTING'           => 'Extrayendo entidades...',
+	'PORTAL_NEWS_EXTRACTION_FAILED'    => 'No se pudieron extraer entidades.',
+	'PORTAL_NEWS_EXTRACTION_PARTIAL'   => 'Datos parciales.',
+	'PORTAL_NEWS_ENTITIES_PEOPLE'      => 'Personas',
+	'PORTAL_NEWS_ENTITIES_ORGANIZATIONS' => 'Organizaciones',
+	'PORTAL_NEWS_ENTITIES_PLACES'      => 'Lugares',
+	'PORTAL_NEWS_ENTITIES_DATES'       => 'Fechas',
+	'PORTAL_NEWS_ENTITIES_SOURCES'     => 'Fuentes',
 ]);

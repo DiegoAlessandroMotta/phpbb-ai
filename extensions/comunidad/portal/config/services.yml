@@ -64,6 +64,17 @@ services:
         tags:
             - { name: event.listener }
 
+    comunidad.portal.listener.viewtopic:
+        class: comunidad\portal\event\viewtopic_listener
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@template'
+            - '@user'
+            - '%core.table_prefix%'
+        tags:
+            - { name: event.listener }
+
     comunidad.portal.cron.task.extraction:
         class: comunidad\portal\cron\extract_news_entities
         arguments:

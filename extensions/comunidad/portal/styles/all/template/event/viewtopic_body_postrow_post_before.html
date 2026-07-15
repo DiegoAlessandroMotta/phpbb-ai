@@ -1,0 +1,94 @@
+<!-- IF postrow.S_FIRST_POST and S_PORTAL_NEWS_META_LOADED -->
+<div class="portal-news-entities">
+
+	<!-- IF S_PORTAL_NEWS_EXTRACTING -->
+	<div class="portal-news-entities-status extracting">
+		<span class="portal-news-spinner" aria-hidden="true"></span>
+		{L_PORTAL_NEWS_EXTRACTING}
+	</div>
+
+	<!-- ELSEIF S_PORTAL_NEWS_EXTRACTION_FAILED -->
+	<div class="portal-news-entities-status failed">
+		{L_PORTAL_NEWS_EXTRACTION_FAILED}
+		<!-- IF PORTAL_NEWS_ERROR_MESSAGE --><small class="portal-news-entities-error"> &mdash; {PORTAL_NEWS_ERROR_MESSAGE}</small><!-- ENDIF -->
+	</div>
+
+	<!-- ELSEIF S_PORTAL_NEWS_EXTRACTION_PARTIAL -->
+	<div class="portal-news-entities-status partial">
+		{L_PORTAL_NEWS_EXTRACTION_PARTIAL}
+	</div>
+
+	<!-- ELSEIF S_PORTAL_NEWS_EXTRACTION_OK -->
+		<!-- IF S_PORTAL_NEWS_HAS_PEOPLE -->
+		<div class="portal-news-entities-section">
+			<strong>{L_PORTAL_NEWS_ENTITIES_PEOPLE}</strong>
+			<ul class="portal-news-entities-list">
+			<!-- BEGIN portal_news_people -->
+				<li>
+					{portal_news_people.NAME}
+					<!-- IF portal_news_people.CONTEXT --><span class="context">{portal_news_people.CONTEXT}</span><!-- ENDIF -->
+				</li>
+			<!-- END portal_news_people -->
+			</ul>
+		</div>
+		<!-- ENDIF -->
+
+		<!-- IF S_PORTAL_NEWS_HAS_ORGANIZATIONS -->
+		<div class="portal-news-entities-section">
+			<strong>{L_PORTAL_NEWS_ENTITIES_ORGANIZATIONS}</strong>
+			<ul class="portal-news-entities-list">
+			<!-- BEGIN portal_news_organizations -->
+				<li>
+					{portal_news_organizations.NAME}
+					<!-- IF portal_news_organizations.CONTEXT --><span class="context">{portal_news_organizations.CONTEXT}</span><!-- ENDIF -->
+				</li>
+			<!-- END portal_news_organizations -->
+			</ul>
+		</div>
+		<!-- ENDIF -->
+
+		<!-- IF S_PORTAL_NEWS_HAS_PLACES -->
+		<div class="portal-news-entities-section">
+			<strong>{L_PORTAL_NEWS_ENTITIES_PLACES}</strong>
+			<ul class="portal-news-entities-list">
+			<!-- BEGIN portal_news_places -->
+				<li>
+					{portal_news_places.NAME}
+					<!-- IF portal_news_places.CONTEXT --><span class="context">{portal_news_places.CONTEXT}</span><!-- ENDIF -->
+				</li>
+			<!-- END portal_news_places -->
+			</ul>
+		</div>
+		<!-- ENDIF -->
+
+		<!-- IF S_PORTAL_NEWS_HAS_DATES -->
+		<div class="portal-news-entities-section">
+			<strong>{L_PORTAL_NEWS_ENTITIES_DATES}</strong>
+			<ul class="portal-news-entities-list">
+			<!-- BEGIN portal_news_dates -->
+				<li>
+					{portal_news_dates.NAME}
+					<!-- IF portal_news_dates.CONTEXT --><span class="context">{portal_news_dates.CONTEXT}</span><!-- ENDIF -->
+				</li>
+			<!-- END portal_news_dates -->
+			</ul>
+		</div>
+		<!-- ENDIF -->
+
+		<!-- IF S_PORTAL_NEWS_HAS_SOURCES -->
+		<div class="portal-news-entities-section">
+			<strong>{L_PORTAL_NEWS_ENTITIES_SOURCES}</strong>
+			<ul class="portal-news-entities-list">
+			<!-- BEGIN portal_news_sources -->
+				<li>
+					{portal_news_sources.NAME}
+					<!-- IF portal_news_sources.CONTEXT --><span class="context">{portal_news_sources.CONTEXT}</span><!-- ENDIF -->
+				</li>
+			<!-- END portal_news_sources -->
+			</ul>
+		</div>
+		<!-- ENDIF -->
+	<!-- ENDIF -->
+
+</div>
+<!-- ENDIF -->
