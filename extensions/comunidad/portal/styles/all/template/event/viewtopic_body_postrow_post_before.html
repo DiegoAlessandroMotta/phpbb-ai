@@ -1,3 +1,4 @@
+<!-- INCLUDECSS @comunidad_portal/portal.css -->
 <!-- IF postrow.S_FIRST_POST and S_PORTAL_NEWS_META_LOADED -->
 <div class="portal-news-entities">
 
@@ -20,72 +21,72 @@
 
 	<!-- ELSEIF S_PORTAL_NEWS_EXTRACTION_OK -->
 		<!-- IF S_PORTAL_NEWS_HAS_PEOPLE -->
-		<div class="portal-news-entities-section">
-			<strong>{L_PORTAL_NEWS_ENTITIES_PEOPLE}</strong>
-			<ul class="portal-news-entities-list">
+		<div class="portal-news-entities-section portal-news-section-people">
+			<strong class="portal-news-section-label"><span class="portal-news-section-dot"></span>{L_PORTAL_NEWS_ENTITIES_PEOPLE}</strong>
+			<div class="portal-news-chips">
 			<!-- BEGIN portal_news_people -->
-				<li>
-					{portal_news_people.NAME}
-					<!-- IF portal_news_people.CONTEXT --><span class="context">{portal_news_people.CONTEXT}</span><!-- ENDIF -->
-				</li>
+				<span class="portal-news-chip portal-news-chip-people">
+					<span class="portal-news-chip-name">{portal_news_people.NAME}</span>
+					<!-- IF portal_news_people.CONTEXT --><span class="portal-news-chip-context">{portal_news_people.CONTEXT}</span><!-- ENDIF -->
+				</span>
 			<!-- END portal_news_people -->
-			</ul>
+			</div>
 		</div>
 		<!-- ENDIF -->
 
 		<!-- IF S_PORTAL_NEWS_HAS_ORGANIZATIONS -->
-		<div class="portal-news-entities-section">
-			<strong>{L_PORTAL_NEWS_ENTITIES_ORGANIZATIONS}</strong>
-			<ul class="portal-news-entities-list">
+		<div class="portal-news-entities-section portal-news-section-organizations">
+			<strong class="portal-news-section-label"><span class="portal-news-section-dot"></span>{L_PORTAL_NEWS_ENTITIES_ORGANIZATIONS}</strong>
+			<div class="portal-news-chips">
 			<!-- BEGIN portal_news_organizations -->
-				<li>
-					{portal_news_organizations.NAME}
-					<!-- IF portal_news_organizations.CONTEXT --><span class="context">{portal_news_organizations.CONTEXT}</span><!-- ENDIF -->
-				</li>
+				<span class="portal-news-chip portal-news-chip-organizations">
+					<span class="portal-news-chip-name">{portal_news_organizations.NAME}</span>
+					<!-- IF portal_news_organizations.CONTEXT --><span class="portal-news-chip-context">{portal_news_organizations.CONTEXT}</span><!-- ENDIF -->
+				</span>
 			<!-- END portal_news_organizations -->
-			</ul>
+			</div>
 		</div>
 		<!-- ENDIF -->
 
 		<!-- IF S_PORTAL_NEWS_HAS_PLACES -->
-		<div class="portal-news-entities-section">
-			<strong>{L_PORTAL_NEWS_ENTITIES_PLACES}</strong>
-			<ul class="portal-news-entities-list">
+		<div class="portal-news-entities-section portal-news-section-places">
+			<strong class="portal-news-section-label"><span class="portal-news-section-dot"></span>{L_PORTAL_NEWS_ENTITIES_PLACES}</strong>
+			<div class="portal-news-chips">
 			<!-- BEGIN portal_news_places -->
-				<li>
-					{portal_news_places.NAME}
-					<!-- IF portal_news_places.CONTEXT --><span class="context">{portal_news_places.CONTEXT}</span><!-- ENDIF -->
-				</li>
+				<span class="portal-news-chip portal-news-chip-places">
+					<span class="portal-news-chip-name">{portal_news_places.NAME}</span>
+					<!-- IF portal_news_places.CONTEXT --><span class="portal-news-chip-context">{portal_news_places.CONTEXT}</span><!-- ENDIF -->
+				</span>
 			<!-- END portal_news_places -->
-			</ul>
+			</div>
 		</div>
 		<!-- ENDIF -->
 
 		<!-- IF S_PORTAL_NEWS_HAS_DATES -->
-		<div class="portal-news-entities-section">
-			<strong>{L_PORTAL_NEWS_ENTITIES_DATES}</strong>
-			<ul class="portal-news-entities-list">
+		<div class="portal-news-entities-section portal-news-section-dates">
+			<strong class="portal-news-section-label"><span class="portal-news-section-dot"></span>{L_PORTAL_NEWS_ENTITIES_DATES}</strong>
+			<div class="portal-news-chips">
 			<!-- BEGIN portal_news_dates -->
-				<li>
-					{portal_news_dates.NAME}
-					<!-- IF portal_news_dates.CONTEXT --><span class="context">{portal_news_dates.CONTEXT}</span><!-- ENDIF -->
-				</li>
+				<span class="portal-news-chip portal-news-chip-dates">
+					<span class="portal-news-chip-name">{portal_news_dates.NAME}</span>
+					<!-- IF portal_news_dates.CONTEXT --><span class="portal-news-chip-context">{portal_news_dates.CONTEXT}</span><!-- ENDIF -->
+				</span>
 			<!-- END portal_news_dates -->
-			</ul>
+			</div>
 		</div>
 		<!-- ENDIF -->
 
 		<!-- IF S_PORTAL_NEWS_HAS_SOURCES -->
-		<div class="portal-news-entities-section">
-			<strong>{L_PORTAL_NEWS_ENTITIES_SOURCES}</strong>
-			<ul class="portal-news-entities-list">
+		<div class="portal-news-entities-section portal-news-section-sources">
+			<strong class="portal-news-section-label"><span class="portal-news-section-dot"></span>{L_PORTAL_NEWS_ENTITIES_SOURCES}</strong>
+			<div class="portal-news-chips">
 			<!-- BEGIN portal_news_sources -->
-				<li>
-					{portal_news_sources.NAME}
-					<!-- IF portal_news_sources.CONTEXT --><span class="context">{portal_news_sources.CONTEXT}</span><!-- ENDIF -->
-				</li>
+				<span class="portal-news-chip portal-news-chip-sources">
+					<span class="portal-news-chip-name">{portal_news_sources.NAME}</span>
+					<!-- IF portal_news_sources.CONTEXT --><span class="portal-news-chip-context">{portal_news_sources.CONTEXT}</span><!-- ENDIF -->
+				</span>
 			<!-- END portal_news_sources -->
-			</ul>
+			</div>
 		</div>
 		<!-- ENDIF -->
 	<!-- ENDIF -->
