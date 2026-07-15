@@ -28,3 +28,8 @@ services:
             - '@user'
         tags:
             - { name: event.listener }
+
+    comunidad.portal.llm.client:
+        class: comunidad\portal\service\llm\GeminiClient
+        arguments:
+            - '@config'
