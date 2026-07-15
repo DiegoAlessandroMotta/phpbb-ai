@@ -29,6 +29,11 @@
 #   2.7. Enable extensions declared in PHPBB_EXTENSIONS (comma-
 #      separated vendor/ext names). Idempotent; failures are logged
 #      but do not abort the entrypoint.
+#   2.8. Sync phpBB styles from /etc/phpbb/styles/ into
+#      /var/www/html/styles/. Same declarative pattern as extensions
+#      and config.php: host is source of truth, overwrite on every
+#      container start. phpBB picks up new styles on the next request
+#      (it scans the directory on first hit).
 #   3. Chown: make sure the doc root belongs to www-data.
 #   4. Hand off to the base image's entrypoint (starts Apache).
 
@@ -171,6 +176,45 @@ if [ -n "${PHPBB_EXTENSIONS:-}" ]; then
         IFS=','
     done
     IFS="$OLD_IFS"
+fi
+
+# --- 2.8. Sync phpBB styles from /etc/phpbb/styles/ ------------------
+# Same pattern as extensions (phase 2.6): each subdirectory of
+# /etc/phpbb/styles/ is a style. Overwrite on every start so host
+# edits to CSS / templates take effect on restart. phpBB discovers
+# styles by scanning /var/www/html/styles/ on the first request
+# after this sync, and records them in the phpbb_styles table.
+# Style activation (default_style) is handled separately via a
+# SQL UPDATE — see docker/post-bootstrap.d/ if you need it.
+if [ -d /etc/phpbb/styles ]; then
+    mkdir -p /var/www/html/styles
+    for style_dir in /etc/phpbb/styles/*/; do
+        [ -d "$style_dir" ] || continue
+        rel="${style_dir#/etc/phpbb/styles/}"
+        rel="${rel%/}"
+        [ -z "$rel" ] && continue
+        # Copy any subdir: real styles have style.cfg, the "all"
+        # pseudo-style does not (it's the global fallback Twig looks
+        # in for missing templates). We want both.
+        mkdir -p "/var/www/html/styles/$rel"
+        cp -r "$style_dir"/. "/var/www/html/styles/$rel/"
+        if [ -f "$style_dir/style.cfg" ]; then
+            echo "[entrypoint] Synced style: $rel"
+        else
+            echo "[entrypoint] Synced style assets: $rel"
+        fi
+    done
+fi
+
+# --- 2.9. Activate default style declared in PHPBB_DEFAULT_STYLE ------
+# phpBB's installer sets default_style=1 (prosilver) and
+# override_user_style=0, so the default config is ignored and every
+# user (including Anonymous) uses their user_style=1=prosilver. To
+# ship a different default style, we need all three: register the
+# style, point default_style at it, and flip override_user_style=1.
+# docker/activate-style.php does all three, idempotently.
+if [ -n "${PHPBB_DEFAULT_STYLE:-}" ]; then
+    php /etc/phpbb/activate-style.php || echo "[entrypoint] WARNING: activate-style failed (non-fatal)"
 fi
 
 # --- 3. Chown ----------------------------------------------------------

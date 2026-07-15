@@ -30,6 +30,14 @@ services:
       # Extensions to auto-enable on container start. Comma-separated
       # vendor/ext names. Empty by default; set in .env.
       PHPBB_EXTENSIONS: ${PHPBB_EXTENSIONS:-}
+      # Default style to activate on container start (e.g. "digi").
+      # Empty by default — phpBB ships with prosilver as default. The
+      # style's code must live under ./styles/<name>/ and be
+      # inherited from prosilver (or another installed style).
+      PHPBB_DEFAULT_STYLE: ${PHPBB_DEFAULT_STYLE:-}
+      # Parent style for PHPBB_DEFAULT_STYLE. Defaults to "prosilver"
+      # when unset.
+      PHPBB_DEFAULT_STYLE_PARENT: ${PHPBB_DEFAULT_STYLE_PARENT:-prosilver}
     # Bind-mount the doc root so phpBB files are visible + editable
     # in your editor at ./html/. The entrypoint copies the staged
     # source into ./html on first boot only.
@@ -47,6 +55,12 @@ services:
       # effect on restart. Mounted :ro so the container can't mutate
       # your working copy.
       - ./extensions:/etc/phpbb/extensions:ro
+      # phpBB styles. Drop style directories into ./styles/
+      # (e.g. styles/digi/, styles/prosilver_se/). The entrypoint
+      # copies them into /var/www/html/styles/ on every container
+      # start (phase 2.8). Mounted :ro for the same reason as
+      # extensions — the host copy is source of truth.
+      - ./styles:/etc/phpbb/styles:ro
     depends_on:
       db:
         condition: service_healthy

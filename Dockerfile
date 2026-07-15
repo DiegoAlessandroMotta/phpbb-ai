@@ -83,6 +83,12 @@ COPY install-config.yml.template /etc/phpbb/install-config.yml.template
 # `extensions/.gitkeep` guarantees the COPY source always exists.
 COPY extensions/ /etc/phpbb/extensions/
 
+# Stage phpBB styles. Same pattern as extensions: bind-mount in dev,
+# COPY in prod. The entrypoint (phase 2.8) syncs them into
+# /var/www/html/styles/. `styles/.gitkeep` keeps the COPY source
+# non-empty even when no styles are committed yet.
+COPY styles/ /etc/phpbb/styles/
+
 # Final ownership on the staging dir.
 RUN chown -R www-data:www-data /usr/src/phpbb /etc/phpbb
 
@@ -91,6 +97,10 @@ RUN chown -R www-data:www-data /usr/src/phpbb /etc/phpbb
 # copy first. See docker/entrypoint.sh for the full reasoning.
 COPY docker/entrypoint.sh /usr/local/bin/phpbb-entrypoint.sh
 RUN chmod +x /usr/local/bin/phpbb-entrypoint.sh
+
+# Style activator. Idempotent SQL script run by the entrypoint when
+# PHPBB_DEFAULT_STYLE is set. See docker/activate-style.php.
+COPY docker/activate-style.php /etc/phpbb/activate-style.php
 
 EXPOSE 80
 

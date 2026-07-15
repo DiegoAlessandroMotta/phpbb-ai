@@ -41,6 +41,14 @@ services:
       # vendor/ext names. Empty by default; set in the platform's
       # env-var UI.
       PHPBB_EXTENSIONS: ${PHPBB_EXTENSIONS:-}
+      # Default style to activate on container start (e.g. "digi").
+      # Empty by default — phpBB ships with prosilver as default. The
+      # style's code must live under ./styles/<name>/ and be
+      # inherited from prosilver (or another installed style).
+      PHPBB_DEFAULT_STYLE: ${PHPBB_DEFAULT_STYLE:-}
+      # Parent style for PHPBB_DEFAULT_STYLE. Defaults to "prosilver"
+      # when unset.
+      PHPBB_DEFAULT_STYLE_PARENT: ${PHPBB_DEFAULT_STYLE_PARENT:-prosilver}
     volumes:
       # Persistent app state: attachments, cache, sessions, config.php.
       # Back this up — it's the only stateful piece.
