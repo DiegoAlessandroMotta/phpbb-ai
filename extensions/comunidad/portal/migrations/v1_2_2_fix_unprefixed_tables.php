@@ -1,26 +1,41 @@
 <?php
 /**
  *
- * Portal Comunitario — news meta + extraction log tables.
+ * Portal Comunitario — fix the unprefixed tables from v1.2.0.
  *
- * Sets up:
- *   - portal_news_meta             (1 row per topic, holds extraction result)
- *   - portal_news_extraction_log   (append-only audit trail of attempts)
- *   - config keys for AI provider, batch size, and cadence
+ * The original v1.2.0 migration forgot to prepend $this->table_prefix
+ * to the table names in its add_tables array, so the tables were
+ * created as `portal_news_meta` and `portal_news_extraction_log`
+ * instead of `phpbb_portal_news_meta` / `phpbb_portal_news_extraction_log`.
  *
- * Required by feature 3 (entity extraction). No behavior change
- * until a follow-up commit wires the event listener and cron
- * task that actually call the LlmClient.
+ * This migration fixes the existing DB by:
+ *   1. Dropping the unprefixed tables if they exist (no-op on fresh
+ *      installs where the fixed v1.2.0 already used the prefix).
+ *   2. Creating the correctly-prefixed tables.
+ *
+ * Idempotent: `effectively_installed()` short-circuits when the
+ * prefixed `portal_news_meta` already exists (the case on this
+ * dev DB after the manual fix, or on a fresh install that ran
+ * the corrected v1.2.0).
  *
  * @package comunidad\portal
  */
 namespace comunidad\portal\migrations;
 
-class v1_2_0_news_meta extends \phpbb\db\migration\migration
+class v1_2_2_fix_unprefixed_tables extends \phpbb\db\migration\migration
 {
+	public function effectively_installed()
+	{
+		return $this->db_tools->sql_table_exists($this->table_prefix . 'portal_news_meta');
+	}
+
 	public function update_schema()
 	{
 		return [
+			'drop_tables' => [
+				'portal_news_meta',
+				'portal_news_extraction_log',
+			],
 			'add_tables' => [
 				$this->table_prefix . 'portal_news_meta' => [
 					'COLUMNS' => [
@@ -62,39 +77,13 @@ class v1_2_0_news_meta extends \phpbb\db\migration\migration
 		];
 	}
 
-	public function update_data()
-	{
-		return [
-			['config.add', ['portal_ai_gemini_api_key', '']],
-			['config.add', ['portal_ai_gemini_model', 'gemini-3.1-flash-lite']],
-			['config.add', ['portal_ai_max_output_tokens', 1000]],
-			['config.add', ['portal_extraction_enabled', 1]],
-			['config.add', ['portal_extraction_batch_size', 20]],
-			['config.add', ['portal_extraction_max_attempts', 3]],
-			['config.add', ['portal_extraction_last_run', 0]],
-		];
-	}
-
 	public function revert_schema()
 	{
 		return [
 			'drop_tables' => [
-				'portal_news_meta',
-				'portal_news_extraction_log',
+				$this->table_prefix . 'portal_news_meta',
+				$this->table_prefix . 'portal_news_extraction_log',
 			],
-		];
-	}
-
-	public function revert_data()
-	{
-		return [
-			['config.remove', ['portal_ai_gemini_api_key']],
-			['config.remove', ['portal_ai_gemini_model']],
-			['config.remove', ['portal_ai_max_output_tokens']],
-			['config.remove', ['portal_extraction_enabled']],
-			['config.remove', ['portal_extraction_batch_size']],
-			['config.remove', ['portal_extraction_max_attempts']],
-			['config.remove', ['portal_extraction_last_run']],
 		];
 	}
 }
