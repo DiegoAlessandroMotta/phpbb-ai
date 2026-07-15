@@ -3,10 +3,14 @@
  *
  * Portal Comunitario — ACP module entry point.
  *
- * Wires the URL `adm/index.php?i=<id>&mode=news` to the
- * `comunidad.portal.acp.controller` service. Kept as a thin
- * shim so the module system has a single static entry to call;
- * all business logic lives in the controller.
+ * Wires ACP module URLs to their respective controllers based on
+ * the `mode` parameter. Kept as a thin shim so the module system
+ * has a single static entry per category; all business logic
+ * lives in the controllers.
+ *
+ * Modes:
+ *   - news       (default) — portal news block config
+ *   - extraction           — entity extraction list + re-extraer
  *
  * @package comunidad\portal
  */
@@ -27,6 +31,22 @@ class main_module
 	{
 		global $phpbb_container, $request, $user;
 
+		if ($mode === 'extraction') {
+			$this->tpl_name    = 'acp_extraction';
+			$this->page_title  = 'ACP_PORTAL_EXTRACTION';
+
+			$controller = $phpbb_container->get('comunidad.portal.acp.extraction.controller');
+			$controller->set_page_url($this->u_action);
+
+			if ($request->is_set_post('reextract')) {
+				$controller->reextract($request->variable('topic_id', 0));
+			}
+
+			$controller->display();
+			return;
+		}
+
+		// Default: news block config.
 		$this->tpl_name		= 'acp_news';
 		$this->page_title	= 'ACP_PORTAL_NEWS';
 

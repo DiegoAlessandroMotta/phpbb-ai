@@ -20,6 +20,19 @@ services:
             - '@template'
             - '@user'
 
+    comunidad.portal.acp.extraction.controller:
+        class: comunidad\portal\controller\acp_extraction
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@request'
+            - '@template'
+            - '@user'
+            - '@comunidad.portal.extraction.service'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '%core.table_prefix%'
+
     comunidad.portal.listener:
         class: comunidad\portal\event\main_listener
         arguments:

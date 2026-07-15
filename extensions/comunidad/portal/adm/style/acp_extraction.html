@@ -1,0 +1,74 @@
+<!-- INCLUDE overall_header.html -->
+
+<a id="maincontent"></a>
+
+<h1>{L_ACP_PORTAL_EXTRACTION}</h1>
+
+<p>{L_ACP_PORTAL_EXTRACTION_EXPLAIN}</p>
+
+<!-- IF not S_EXTRACTION_ENABLED -->
+<div class="errorbox">
+	<p><strong>{L_ACP_PORTAL_EXTRACTION_DISABLED}</strong></p>
+</div>
+<!-- ENDIF -->
+
+<!-- IF not S_LLM_CONFIGURED -->
+<div class="errorbox">
+	<p><strong>{L_ACP_PORTAL_EXTRACTION_NO_LLM}</strong></p>
+</div>
+<!-- ENDIF -->
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_EXTRACTION_STATUS}</legend>
+	<dl>
+		<dt><label>{L_ACP_PORTAL_EXTRACTION_LAST_RUN}</label></dt>
+		<dd><!-- IF LAST_RUN_FORMATTED -->{LAST_RUN_FORMATTED}<!-- ELSE -->&mdash;<!-- ENDIF --></dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_EXTRACTION_LIST}</legend>
+
+	<!-- IF .extractions -->
+	<table class="table1">
+		<thead>
+			<tr>
+				<th>{L_ACP_PORTAL_EXTRACTION_TOPIC}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_STATUS_COL}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_EXTRACTED}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_ATTEMPTS}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_TOKENS}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_MODEL}</th>
+				<th>{L_ACP_PORTAL_EXTRACTION_ACTIONS}</th>
+			</tr>
+		</thead>
+		<tbody>
+		<!-- BEGIN extractions -->
+			<tr>
+				<td>
+					<a href="{extractions.U_TOPIC}">{extractions.TOPIC_TITLE}</a>
+					<!-- IF extractions.S_HAS_ERROR -->
+					<br><span class="error">{extractions.ERROR_MESSAGE}</span>
+					<!-- ENDIF -->
+				</td>
+				<td><span class="extraction-status extraction-status-{extractions.STATUS}">{extractions.STATUS_LABEL}</span></td>
+				<td><!-- IF extractions.EXTRACTED_AT -->{extractions.EXTRACTED_AT}<!-- ELSE -->&mdash;<!-- ENDIF --></td>
+				<td>{extractions.ATTEMPT_COUNT}</td>
+				<td>{extractions.PROMPT_TOKENS} / {extractions.COMPLETION_TOKENS}</td>
+				<td>{extractions.MODEL_NAME}</td>
+				<td>
+					<form method="post" action="{U_ACTION}" class="portal-inline-form">
+						<input type="hidden" name="topic_id" value="{extractions.TOPIC_ID}" />
+						<button type="submit" name="reextract" class="button2">{L_ACP_PORTAL_EXTRACTION_REEXTRACT}</button>
+					</form>
+				</td>
+			</tr>
+		<!-- END extractions -->
+		</tbody>
+	</table>
+	<!-- ELSE -->
+	<p>{L_ACP_PORTAL_EXTRACTION_EMPTY}</p>
+	<!-- ENDIF -->
+</fieldset>
+
+<!-- INCLUDE overall_footer.html -->
