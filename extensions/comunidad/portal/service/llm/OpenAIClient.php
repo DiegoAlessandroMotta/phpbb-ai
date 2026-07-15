@@ -63,7 +63,7 @@ class OpenAIClient implements LlmClient
 				'type'       => 'json_schema',
 				'json_schema' => [
 					'name'   => 'response',
-					'strict' => true,
+					'strict' => false,
 					'schema' => $jsonSchema,
 				],
 			],
