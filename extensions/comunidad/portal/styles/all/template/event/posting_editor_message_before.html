@@ -24,67 +24,129 @@
 		<button type="button" class="button portal-assistant-btn" data-action="title"><!-- IF S_PORTAL_ASSISTANT_CAN_RUN --><!-- ELSE -->disabled<!-- ENDIF -->>{L_PORTAL_ASSISTANT_TITLE}</button>
 	</div>
 	<div class="portal-assistant-status" id="portal-assistant-status-editor" hidden></div>
+	<div class="portal-assistant-result" id="portal-assistant-result-editor" hidden>
+		<textarea class="portal-assistant-textarea" readonly id="portal-assistant-textarea-editor"></textarea>
+		<div class="portal-assistant-result-actions">
+			<button type="button" class="button portal-assistant-copy" id="portal-assistant-copy-editor">{L_PORTAL_ASSISTANT_COPY}</button>
+			<button type="button" class="button portal-assistant-close" id="portal-assistant-close-editor">{L_PORTAL_ASSISTANT_CLOSE}</button>
+		</div>
+	</div>
 	<!-- ENDIF -->
 </div>
 
 <script>
 (function () {
 	'use strict';
-	var root = document.getElementById('portal-assistant-editor');
-	if (!root) { return; }
-	var status = document.getElementById('portal-assistant-status-editor');
-	var quota  = document.getElementById('portal-assistant-quota-editor');
-	var editor = document.getElementsByName('message')[0];
-	var endpoint = root.getAttribute('data-endpoint');
-	var tokenInput = root.querySelector('input[name="form_token"]');
-	var timeInput  = root.querySelector('input[name="creation_time"]');
-	var token    = tokenInput ? tokenInput.value : '';
-	var creation = timeInput  ? timeInput.value  : '';
-	var limit    = parseInt(root.getAttribute('data-limit') || '0', 10);
-	var btns     = root.querySelectorAll('.portal-assistant-btn');
+	var REPLACE_ACTIONS = ['improve', 'friendly'];
 
-	function setStatus(kind, text) {
-		if (!status) { return; }
-		status.hidden = false;
-		status.className = 'portal-assistant-status portal-assistant-status-' + kind;
-		status.textContent = text;
-	}
-	function setRemaining(n) {
-		if (quota) { quota.textContent = n + '/' + limit; }
-		btns.forEach(function (b) { b.disabled = !(n > 0); });
-	}
-	function run(action) {
-		if (!editor) { return; }
-		var text = editor.value.trim();
-		if (!text) { setStatus('error', '{L_PORTAL_ASSISTANT_EMPTY_ERROR}'); return; }
-		btns.forEach(function (b) { b.disabled = true; });
-		setStatus('thinking', '{L_PORTAL_ASSISTANT_THINKING}');
-		fetch(endpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-				'X-Requested-With': 'XMLHttpRequest'
-			},
-			credentials: 'same-origin',
-			body: 'action=' + encodeURIComponent(action) + '&text=' + encodeURIComponent(text) + '&form_token=' + encodeURIComponent(token) + '&creation_time=' + encodeURIComponent(creation)
-		}).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-		.then(function (res) {
-			if (res.j && res.j.ok) {
-				editor.value = res.j.text;
-				setStatus('ok', '{L_PORTAL_ASSISTANT_REVIEW_BEFORE_PUBLISH}');
-				if (typeof res.j.remaining === 'number') { setRemaining(res.j.remaining); }
-			} else {
-				setStatus('error', (res.j && res.j.error) ? res.j.error : '{L_PORTAL_ASSISTANT_GENERIC_ERROR}');
-				btns.forEach(function (b) { b.disabled = false; });
+	function showInitError(msg) {
+		try {
+			var status = document.getElementById('portal-assistant-status-editor');
+			if (status) {
+				status.hidden = false;
+				status.className = 'portal-assistant-status portal-assistant-status-error';
+				status.textContent = msg;
 			}
-		}).catch(function () {
-			setStatus('error', '{L_PORTAL_ASSISTANT_NETWORK_ERROR}');
-			btns.forEach(function (b) { b.disabled = false; });
-		});
+		} catch (e) {}
 	}
-	btns.forEach(function (b) {
-		b.addEventListener('click', function () { run(b.getAttribute('data-action')); });
-	});
+	function init() {
+		try {
+			var root = document.getElementById('portal-assistant-editor');
+			if (!root) { showInitError('init: root missing'); return; }
+			var status    = document.getElementById('portal-assistant-status-editor');
+			var quota     = document.getElementById('portal-assistant-quota-editor');
+			var resultBox = document.getElementById('portal-assistant-result-editor');
+			var textarea  = document.getElementById('portal-assistant-textarea-editor');
+			var copyBtn   = document.getElementById('portal-assistant-copy-editor');
+			var closeBtn  = document.getElementById('portal-assistant-close-editor');
+			var endpoint  = root.getAttribute('data-endpoint');
+			if (!endpoint) { showInitError('init: endpoint missing'); return; }
+			var tokenInput = root.querySelector('input[name="form_token"]');
+			var timeInput  = root.querySelector('input[name="creation_time"]');
+			var token    = tokenInput ? tokenInput.value : '';
+			var creation = timeInput  ? timeInput.value  : '';
+			var limit    = parseInt(root.getAttribute('data-limit') || '0', 10);
+			var btns     = root.querySelectorAll('.portal-assistant-btn');
+			if (!btns.length) { showInitError('init: no buttons'); return; }
+
+			function setStatus(kind, text) {
+				if (!status) { return; }
+				status.hidden = false;
+				status.className = 'portal-assistant-status portal-assistant-status-' + kind;
+				status.textContent = text;
+			}
+			function setRemaining(n) {
+				if (quota) { quota.textContent = n + '/' + limit; }
+				btns.forEach(function (b) { b.disabled = !(n > 0); });
+			}
+			function showResult(text) {
+				textarea.value = text;
+				resultBox.hidden = false;
+			}
+			function hideResult() {
+				resultBox.hidden = true;
+				textarea.value = '';
+			}
+			function run(action) {
+				var editor = document.getElementsByName('message')[0];
+				if (!editor) {
+					showInitError('run: editor textarea (name=message) not found');
+					return;
+				}
+				var text = editor.value.trim();
+				if (!text) { setStatus('error', '{L_PORTAL_ASSISTANT_EMPTY_ERROR}'); return; }
+				btns.forEach(function (b) { b.disabled = true; });
+				setStatus('thinking', '{L_PORTAL_ASSISTANT_THINKING}');
+				fetch(endpoint, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+						'X-Requested-With': 'XMLHttpRequest'
+					},
+					credentials: 'same-origin',
+					body: 'action=' + encodeURIComponent(action) + '&text=' + encodeURIComponent(text) + '&form_token=' + encodeURIComponent(token) + '&creation_time=' + encodeURIComponent(creation)
+				}).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+				.then(function (res) {
+					if (res.j && res.j.ok) {
+						if (REPLACE_ACTIONS.indexOf(action) !== -1) {
+							editor.value = res.j.text;
+							hideResult();
+							setStatus('ok', '{L_PORTAL_ASSISTANT_REVIEW_BEFORE_PUBLISH}');
+						} else {
+							showResult(res.j.text);
+							setStatus('ok', '{L_PORTAL_ASSISTANT_READY_COPY}');
+						}
+						if (typeof res.j.remaining === 'number') { setRemaining(res.j.remaining); }
+					} else {
+						setStatus('error', (res.j && res.j.error) ? res.j.error : '{L_PORTAL_ASSISTANT_GENERIC_ERROR}');
+						btns.forEach(function (b) { b.disabled = false; });
+					}
+				}).catch(function (e) {
+					setStatus('error', '{L_PORTAL_ASSISTANT_NETWORK_ERROR} (' + (e && e.message ? e.message : 'unknown') + ')');
+					btns.forEach(function (b) { b.disabled = false; });
+				});
+			}
+			btns.forEach(function (b) {
+				b.addEventListener('click', function () { run(b.getAttribute('data-action')); });
+			});
+			if (copyBtn) {
+				copyBtn.addEventListener('click', function () {
+					textarea.select();
+					try { document.execCommand('copy'); } catch (e) {}
+				});
+			}
+			if (closeBtn) {
+				closeBtn.addEventListener('click', function () { hideResult(); });
+			}
+		} catch (e) {
+			showInitError('init exception: ' + (e && e.message ? e.message : e));
+		}
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
 })();
 </script>
 <!-- ENDIF -->

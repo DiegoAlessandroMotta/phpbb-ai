@@ -36,7 +36,7 @@ $lang = array_merge($lang, [
 	'PORTAL_NEWS_ENTITIES_DATES'       => 'Fechas',
 	'PORTAL_NEWS_ENTITIES_SOURCES'     => 'Fuentes',
 
-	'PORTAL_ASSISTANT_LABEL'             => 'Asistente editorial',
+	'PORTAL_ASSISTANT_LABEL'             => 'Asistente de escritura',
 	'PORTAL_ASSISTANT_IMPROVE'           => 'Mejorar',
 	'PORTAL_ASSISTANT_FRIENDLY'          => 'Amigable',
 	'PORTAL_ASSISTANT_SUMMARY'           => 'Resumen',

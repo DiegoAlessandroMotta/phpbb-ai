@@ -57,7 +57,7 @@ services:
             - { name: event.listener }
 
     comunidad.portal.llm.client:
-        class: comunidad\portal\service\llm\GeminiClient
+        factory: ['comunidad\portal\service\llm\LlmClientFactory', 'create']
         arguments:
             - '@config'
 
