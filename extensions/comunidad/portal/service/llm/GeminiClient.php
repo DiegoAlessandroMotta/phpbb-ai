@@ -121,4 +121,73 @@ class GeminiClient implements LlmClient
 			model:            (string) ($decoded['modelVersion'] ?? $this->model),
 		);
 	}
+
+	public function generateText(
+		string $systemPrompt,
+		string $userText,
+		int $maxOutputTokens = 900
+	): LlmResponse {
+		if ($this->apiKey === '') {
+			throw new LlmException('Gemini API key not configured. Set portal_ai_gemini_api_key in phpbb_config or the GEMINI_API_KEY env var.');
+		}
+
+		$body = [
+			'contents' => [
+				['role' => 'user', 'parts' => [['text' => $userText]]],
+			],
+			'systemInstruction' => [
+				'parts' => [['text' => $systemPrompt]],
+			],
+			'generationConfig' => [
+				'responseMimeType' => 'text/plain',
+				'maxOutputTokens'  => $maxOutputTokens,
+				'temperature'      => 0.4,
+			],
+		];
+
+		$ch = curl_init($this->endpoint);
+		curl_setopt_array($ch, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_POST           => true,
+			CURLOPT_POSTFIELDS     => json_encode($body, JSON_UNESCAPED_UNICODE),
+			CURLOPT_HTTPHEADER     => [
+				'Content-Type: application/json',
+				'x-goog-api-key: ' . $this->apiKey,
+			],
+			CURLOPT_TIMEOUT        => 30,
+			CURLOPT_CONNECTTIMEOUT => 5,
+		]);
+
+		$response = curl_exec($ch);
+		$httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$error = curl_error($ch);
+		curl_close($ch);
+
+		if ($response === false) {
+			throw new LlmException('Gemini transport error: ' . $error, 0);
+		}
+		if ($httpCode !== 200) {
+			throw new LlmException(
+				'Gemini returned HTTP ' . $httpCode . ': ' . substr($response, 0, 500),
+				$httpCode
+			);
+		}
+
+		$decoded = json_decode($response, true);
+		if (!is_array($decoded)
+			|| empty($decoded['candidates'][0]['content']['parts'][0]['text'])
+		) {
+			throw new LlmException('Gemini response malformed: ' . substr($response, 0, 500), 200);
+		}
+
+		$text = (string) $decoded['candidates'][0]['content']['parts'][0]['text'];
+
+		return new LlmResponse(
+			text:             $text,
+			parsed:           ['text' => $text],
+			promptTokens:     (int) ($decoded['usageMetadata']['promptTokenCount']     ?? 0),
+			completionTokens: (int) ($decoded['usageMetadata']['candidatesTokenCount'] ?? 0),
+			model:            (string) ($decoded['modelVersion'] ?? $this->model),
+		);
+	}
 }
