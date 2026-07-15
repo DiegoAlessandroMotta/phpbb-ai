@@ -1,0 +1,3 @@
+comunidad_portal_index:
+    path: /portal
+    defaults: { _controller: comunidad.portal.controller:index }

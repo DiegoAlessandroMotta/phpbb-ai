@@ -76,6 +76,13 @@ COPY config.php /etc/phpbb/config.php
 # it on first boot to produce the real install-config.yml at /tmp/.
 COPY install-config.yml.template /etc/phpbb/install-config.yml.template
 
+# Stage phpBB extensions. In dev, the entrypoint mounts ./extensions
+# over this directory (see docker-compose.dev.yml), so code edits on
+# the host take effect on restart. In prod, the code baked here ships
+# in the image and the entrypoint copies it into /var/www/html/ext/.
+# `extensions/.gitkeep` guarantees the COPY source always exists.
+COPY extensions/ /etc/phpbb/extensions/
+
 # Final ownership on the staging dir.
 RUN chown -R www-data:www-data /usr/src/phpbb /etc/phpbb
 

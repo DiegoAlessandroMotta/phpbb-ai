@@ -1,0 +1,100 @@
+<!-- INCLUDE overall_header.html -->
+<!-- INCLUDECSS @comunidad_portal/portal.css -->
+
+<div class="community-portal">
+    <section class="portal-hero">
+        <div>
+            <span class="portal-badge">{L_PORTAL}</span>
+            <h1>{L_PORTAL_WELCOME}</h1>
+            <p>{PORTAL_DESCRIPTION}</p>
+            <p class="portal-intro">{L_PORTAL_WELCOME_TEXT}</p>
+            <div class="portal-actions">
+                <a class="button button1" href="{U_FORUM_INDEX}"><i class="icon fa-comments fa-fw"></i> {L_PORTAL_ENTER_FORUM}</a>
+                <a class="button button2" href="{U_SEARCH_ACTIVE}"><i class="icon fa-bolt fa-fw"></i> {L_PORTAL_ACTIVE_TOPICS}</a>
+                <a class="button button2" href="{U_SEARCH_UNANSWERED}"><i class="icon fa-question-circle fa-fw"></i> {L_PORTAL_UNANSWERED}</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="portal-stats" aria-label="{L_PORTAL_STATISTICS}">
+        <div><strong>{TOTAL_POSTS}</strong><span>{L_PORTAL_POSTS}</span></div>
+        <div><strong>{TOTAL_TOPICS}</strong><span>{L_PORTAL_TOPICS}</span></div>
+        <div><strong>{TOTAL_USERS}</strong><span>{L_PORTAL_USERS}</span></div>
+    </section>
+
+    <div class="portal-grid">
+        <main class="portal-main">
+            <section class="portal-card">
+                <div class="portal-card-title">
+                    <h2><i class="icon fa-clock-o fa-fw"></i> {L_PORTAL_RECENT_TOPICS}</h2>
+                </div>
+                <div class="portal-topic-list">
+                    <!-- BEGIN recent_topics -->
+                    <article class="portal-topic">
+                        <div>
+                            <a class="portal-topic-title" href="{recent_topics.U_TOPIC}">{recent_topics.TITLE}</a>
+                            <p><a href="{recent_topics.U_FORUM}">{recent_topics.FORUM_NAME}</a> · {L_PORTAL_LAST_POST_BY} {recent_topics.AUTHOR}</p>
+                        </div>
+                        <div class="portal-topic-meta">
+                            <span>{recent_topics.REPLIES} {L_PORTAL_REPLIES}</span>
+                            <span>{recent_topics.VIEWS} {L_PORTAL_VIEWS}</span>
+                            <time>{recent_topics.LAST_POST}</time>
+                        </div>
+                    </article>
+                    <!-- BEGINELSE -->
+                    <p class="portal-empty">{L_PORTAL_NO_CONTENT}</p>
+                    <!-- END recent_topics -->
+                </div>
+            </section>
+
+            <section class="portal-card">
+                <div class="portal-card-title">
+                    <h2><i class="icon fa-th-large fa-fw"></i> {L_PORTAL_COMMUNITIES}</h2>
+                </div>
+                <div class="portal-forums">
+                    <!-- BEGIN portal_forums -->
+                    <a class="portal-forum" href="{portal_forums.U_FORUM}">
+                        <div class="portal-forum-icon"><i class="icon fa-comments-o fa-fw"></i></div>
+                        <div class="portal-forum-copy">
+                            <h3>{portal_forums.NAME}</h3>
+                            <div>{portal_forums.DESCRIPTION}</div>
+                            <small>{portal_forums.TOPICS} {L_PORTAL_TOPICS} · {portal_forums.POSTS} {L_PORTAL_POSTS}</small>
+                        </div>
+                    </a>
+                    <!-- BEGINELSE -->
+                    <p class="portal-empty">{L_PORTAL_NO_CONTENT}</p>
+                    <!-- END portal_forums -->
+                </div>
+            </section>
+        </main>
+
+        <aside class="portal-sidebar">
+            <section class="portal-card">
+                <div class="portal-card-title"><h2><i class="icon fa-fire fa-fw"></i> {L_PORTAL_POPULAR_TOPICS}</h2></div>
+                <ol class="portal-ranked">
+                    <!-- BEGIN popular_topics -->
+                    <li>
+                        <a href="{popular_topics.U_TOPIC}">{popular_topics.TITLE}</a>
+                        <small>{popular_topics.VIEWS} {L_PORTAL_VIEWS} · {popular_topics.REPLIES} {L_PORTAL_REPLIES}</small>
+                    </li>
+                    <!-- BEGINELSE -->
+                    <li>{L_PORTAL_NO_CONTENT}</li>
+                    <!-- END popular_topics -->
+                </ol>
+            </section>
+
+            <section class="portal-card">
+                <div class="portal-card-title"><h2><i class="icon fa-users fa-fw"></i> {L_PORTAL_NEW_MEMBERS}</h2></div>
+                <ul class="portal-members">
+                    <!-- BEGIN new_members -->
+                    <li><span>{new_members.USERNAME}</span><small>{new_members.JOINED}</small></li>
+                    <!-- BEGINELSE -->
+                    <li>{L_PORTAL_NO_CONTENT}</li>
+                    <!-- END new_members -->
+                </ul>
+            </section>
+        </aside>
+    </div>
+</div>
+
+<!-- INCLUDE overall_footer.html -->

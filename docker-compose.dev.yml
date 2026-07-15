@@ -27,6 +27,9 @@ services:
       # Verbose debug output. Set to "0" (or unset) for prod-like
       # silent behaviour.
       PHPBB_DEBUG: "1"
+      # Extensions to auto-enable on container start. Comma-separated
+      # vendor/ext names. Empty by default; set in .env.
+      PHPBB_EXTENSIONS: ${PHPBB_EXTENSIONS:-}
     # Bind-mount the doc root so phpBB files are visible + editable
     # in your editor at ./html/. The entrypoint copies the staged
     # source into ./html on first boot only.
@@ -37,6 +40,13 @@ services:
       # the YAML the CLI installer reads. Mounted :ro — the rendered
       # file goes to /tmp/.
       - ./install-config.yml.template:/etc/phpbb/install-config.yml.template:ro
+      # phpBB extensions. Drop extension code into ./extensions/
+      # following the layout <vendor>/<ext>/ (e.g. extensions/comunidad/portal/).
+      # The entrypoint copies them into /var/www/html/ext/ on every
+      # container start (phase 2.6) so changes in your editor take
+      # effect on restart. Mounted :ro so the container can't mutate
+      # your working copy.
+      - ./extensions:/etc/phpbb/extensions:ro
     depends_on:
       db:
         condition: service_healthy

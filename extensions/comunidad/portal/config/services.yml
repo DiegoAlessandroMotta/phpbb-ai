@@ -1,0 +1,21 @@
+services:
+    comunidad.portal.controller:
+        class: comunidad\portal\controller\main
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '@template'
+            - '@user'
+            - '@auth'
+            - '@controller.helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+
+    comunidad.portal.listener:
+        class: comunidad\portal\event\main_listener
+        arguments:
+            - '@controller.helper'
+            - '@template'
+            - '@user'
+        tags:
+            - { name: event.listener }

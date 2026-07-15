@@ -32,6 +32,10 @@ services:
       PHPBB_BEHIND_PROXY: "1"
       PHPBB_DEBUG: "0"
       PHPBB_INSTALLED: "1"
+      # Extensions to auto-enable on container start. Comma-separated
+      # vendor/ext names. Empty by default; set in the platform's
+      # env-var UI.
+      PHPBB_EXTENSIONS: ${PHPBB_EXTENSIONS:-}
     volumes:
       # Persistent app state: attachments, cache, sessions, config.php.
       # Back this up — it's the only stateful piece.

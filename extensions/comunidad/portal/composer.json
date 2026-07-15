@@ -1,0 +1,24 @@
+{
+  "name": "comunidad/portal",
+  "type": "phpbb-extension",
+  "description": "Portal comunitario moderno y gratuito para phpBB 3.3.x",
+  "homepage": "https://www.phpbb.com/",
+  "version": "1.0.0",
+  "time": "2026-07-14",
+  "license": "GPL-2.0-only",
+  "authors": [
+    {
+      "name": "Portal Comunitario"
+    }
+  ],
+  "require": {
+    "php": ">=7.2.0",
+    "phpbb/phpbb": ">=3.3.0,<4.0.0@dev"
+  },
+  "extra": {
+    "display-name": "Portal Comunitario",
+    "soft-require": {
+      "phpbb/phpbb": ">=3.3.0,<4.0.0@dev"
+    }
+  }
+}

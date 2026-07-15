@@ -1,0 +1,21 @@
+INSTALACIÓN RÁPIDA
+
+1. Sube la carpeta:
+   ext/comunidad/portal
+
+2. En phpBB abre:
+   Panel de Administración > Personalizar > Administrar extensiones
+
+3. Habilita:
+   Portal Comunitario
+
+4. Limpia la caché.
+
+5. Visita:
+   /app.php/portal
+
+IMPORTANTE:
+- No copies solo los archivos internos. Debe conservarse exactamente la ruta ext/comunidad/portal.
+- No reemplaza ni modifica archivos del núcleo de phpBB.
+- Recomendado para phpBB 3.3.x.
+

@@ -21,6 +21,14 @@
 #      var driven source). This is what makes changes in .env take
 #      effect on restart — without it, the bind-mount snapshot from
 #      the first run would mask the new env values.
+#   2.6. Sync phpBB extensions from /etc/phpbb/extensions/ into
+#      /var/www/html/ext/. Source of truth for extension code lives
+#      on the host (./extensions/ in dev, baked into the image in
+#      prod). Overwrite on every start so host edits take effect on
+#      restart.
+#   2.7. Enable extensions declared in PHPBB_EXTENSIONS (comma-
+#      separated vendor/ext names). Idempotent; failures are logged
+#      but do not abort the entrypoint.
 #   3. Chown: make sure the doc root belongs to www-data.
 #   4. Hand off to the base image's entrypoint (starts Apache).
 
@@ -105,6 +113,64 @@ fi
 if [ -f /etc/phpbb/config.php ]; then
     cp /etc/phpbb/config.php /var/www/html/config.php
     echo "[entrypoint] Synced config.php from env-var driven source."
+fi
+
+# --- 2.6. Sync phpBB extensions from /etc/phpbb/extensions/ ----------
+# Source of truth for extension code is /etc/phpbb/extensions/ (bind-
+# mount from ./extensions/ in dev, COPY in prod). On every container
+# start we copy each vendor/ext/ subtree into /var/www/html/ext/, so
+# host edits to extension code take effect on restart. Overwrite —
+# same declarative principle as config.php. Mount is :ro, so the
+# container cannot mutate your working copy.
+#
+# Layout expected: /etc/phpbb/extensions/<vendor>/<ext>/...
+# (phpBB's standard ext/<vendor>/<ext>/ layout, minus the leading
+# "ext/" that bundles tend to ship with).
+if [ -d /etc/phpbb/extensions ]; then
+    mkdir -p /var/www/html/ext
+    for ext_dir in /etc/phpbb/extensions/*/*/; do
+        [ -d "$ext_dir" ] || continue
+        rel="${ext_dir#/etc/phpbb/extensions/}"
+        rel="${rel%/}"
+        [ -z "$rel" ] && continue
+        if [ -f "$ext_dir/ext.php" ]; then
+            mkdir -p "/var/www/html/ext/$rel"
+            cp -r "$ext_dir"/. "/var/www/html/ext/$rel/"
+            echo "[entrypoint] Synced extension: $rel"
+        fi
+    done
+fi
+
+# --- 2.7. Enable extensions declared in PHPBB_EXTENSIONS -------------
+# Comma-separated list of vendor/ext names (e.g. "comunidad/portal").
+# Runs `phpbbcli.php extension:enable` for each, as www-data. The
+# command is idempotent — enabling an already-enabled extension is a
+# no-op. Failures are logged but do NOT abort the entrypoint: the
+# user can fix the config and restart.
+if [ -n "${PHPBB_EXTENSIONS:-}" ]; then
+    # cache/ must be writable by www-data before the CLI runs.
+    mkdir -p /var/www/html/cache
+    chown www-data:www-data /var/www/html/cache 2>/dev/null || true
+    # Save and restore IFS so the comma split is scoped to this block.
+    OLD_IFS="$IFS"
+    IFS=','
+    for ext in $PHPBB_EXTENSIONS; do
+        IFS="$OLD_IFS"
+        ext=$(printf '%s' "$ext" | tr -d '[:space:]')
+        [ -z "$ext" ] && continue
+        set +e
+        output=$(su www-data -s /bin/sh -c "cd /var/www/html && php bin/phpbbcli.php extension:enable '$ext' 2>&1")
+        enable_exit=$?
+        set -e
+        if [ $enable_exit -eq 0 ]; then
+            echo "[entrypoint] Enabled extension: $ext"
+        else
+            echo "[entrypoint] WARNING: could not enable '$ext' (exit $enable_exit)."
+            echo "$output" | sed 's/^/[entrypoint]   /'
+        fi
+        IFS=','
+    done
+    IFS="$OLD_IFS"
 fi
 
 # --- 3. Chown ----------------------------------------------------------
