@@ -73,9 +73,9 @@ class viewtopic_listener implements EventSubscriberInterface
 
 	public function modify_post_row($event)
 	{
-		$postId = (int) ($event['post_id'] ?? 0);
+		$postId = (int) ($event['row']['post_id'] ?? 0);
 		$firstPostId = (int) ($event['topic_data']['topic_first_post_id'] ?? 0);
-		$topicId = (int) ($event['topic_id'] ?? 0);
+		$topicId = (int) ($event['topic_data']['topic_id'] ?? 0);
 
 		// Only fire on the first post of the topic.
 		if ($postId !== $firstPostId || $topicId <= 0) {

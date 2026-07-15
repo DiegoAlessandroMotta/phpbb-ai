@@ -40,7 +40,7 @@ class posting_listener implements EventSubscriberInterface
 	public static function getSubscribedEvents()
 	{
 		return [
-			'core.posting_modify_submit_posts_after' => 'mark_for_extraction',
+			'core.submit_post_end' => 'mark_for_extraction',
 		];
 	}
 
