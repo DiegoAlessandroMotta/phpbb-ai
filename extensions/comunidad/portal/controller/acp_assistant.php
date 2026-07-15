@@ -22,6 +22,7 @@ namespace comunidad\portal\controller;
 
 use comunidad\portal\service\assistant\RateLimiter;
 use comunidad\portal\service\llm\LlmClient;
+use comunidad\portal\service\llm\LlmClientFactory;
 
 class acp_assistant
 {
@@ -81,6 +82,7 @@ class acp_assistant
 
 	public function display_options()
 	{
+		$provider = (string) ($this->config['portal_ai_provider'] ?? LlmClientFactory::PROVIDER_GEMINI);
 		$apiKey = trim((string) ($this->config['portal_ai_gemini_api_key'] ?? ''));
 		$model  = (string) ($this->config['portal_ai_gemini_model'] ?? 'gemini-3.1-flash-lite');
 
@@ -90,6 +92,7 @@ class acp_assistant
 			'S_LLM_CONFIGURED'                      => $this->llm->is_configured(),
 			'S_LLM_KEY_SET'                         => $apiKey !== '',
 			'PORTAL_AI_GEMINI_MODEL'                => $model,
+			'PORTAL_AI_PROVIDER'                    => $provider,
 			'PORTAL_ASSISTANT_MAX_PER_HOUR'         => (int) $this->config['portal_assistant_max_per_hour'],
 			'PORTAL_ASSISTANT_INPUT_CAP'            => (int) $this->config['portal_assistant_input_cap'],
 			'PORTAL_ASSISTANT_MAX_OUTPUT_TOKENS'    => (int) $this->config['portal_assistant_max_output_tokens'],

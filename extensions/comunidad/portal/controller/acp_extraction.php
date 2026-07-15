@@ -17,6 +17,7 @@
 namespace comunidad\portal\controller;
 
 use comunidad\portal\service\extraction\EntityExtractionService;
+use comunidad\portal\service\llm\LlmClientFactory;
 
 class acp_extraction
 {
@@ -32,6 +33,8 @@ class acp_extraction
 	protected $user;
 	/** @var EntityExtractionService */
 	protected $extraction;
+	/** @var \phpbb\cache\service\cache */
+	protected $cache;
 	/** @var string */
 	protected $u_action;
 	/** @var string */
@@ -48,6 +51,7 @@ class acp_extraction
 		\phpbb\template\template $template,
 		\phpbb\user $user,
 		EntityExtractionService $extraction,
+		\phpbb\cache\service\cache $cache,
 		$root_path,
 		$php_ext,
 		$table_prefix
@@ -58,6 +62,7 @@ class acp_extraction
 		$this->template = $template;
 		$this->user = $user;
 		$this->extraction = $extraction;
+		$this->cache = $cache;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->table_prefix = $table_prefix;
@@ -76,15 +81,23 @@ class acp_extraction
 	public function display()
 	{
 		$lastRun = (int) ($this->config['portal_extraction_last_run'] ?? 0);
-		$apiKey = trim((string) ($this->config['portal_ai_gemini_api_key'] ?? ''));
-		$model = (string) ($this->config['portal_ai_gemini_model'] ?? 'gemini-3.1-flash-lite');
+		$geminiKey = trim((string) ($this->config['portal_ai_gemini_api_key'] ?? ''));
+		$geminiModel = (string) ($this->config['portal_ai_gemini_model'] ?? 'gemini-3.1-flash-lite');
+		$openaiKey = trim((string) ($this->config['portal_ai_openai_api_key'] ?? ''));
+		$openaiModel = (string) ($this->config['portal_ai_openai_model'] ?? 'gpt-4o-mini');
+		$provider = (string) ($this->config['portal_ai_provider'] ?? LlmClientFactory::PROVIDER_GEMINI);
 
 		$this->template->assign_vars([
 			'U_ACTION'                 => $this->u_action,
 			'S_EXTRACTION_ENABLED'     => !empty($this->config['portal_extraction_enabled']),
 			'S_LLM_CONFIGURED'         => $this->extraction->isConfigured(),
-			'S_PORTAL_NEWS_LLM_KEY_SET'=> $apiKey !== '',
-			'PORTAL_AI_GEMINI_MODEL'   => $model,
+			'S_PORTAL_NEWS_LLM_KEY_SET'=> $geminiKey !== '',
+			'S_OPENAI_KEY_SET'         => $openaiKey !== '',
+			'PORTAL_AI_GEMINI_MODEL'   => $geminiModel,
+			'PORTAL_AI_OPENAI_MODEL'   => $openaiModel,
+			'PORTAL_AI_PROVIDER'       => $provider,
+			'S_PROVIDER_GEMINI'        => $provider === LlmClientFactory::PROVIDER_GEMINI,
+			'S_PROVIDER_OPENAI'        => $provider === LlmClientFactory::PROVIDER_OPENAI,
 			'LAST_RUN_FORMATTED'       => $lastRun > 0 ? $this->user->format_date($lastRun) : '',
 		]);
 
@@ -117,26 +130,54 @@ class acp_extraction
 	}
 
 	/**
-	 * Handle the config-form POST. Updates portal_ai_gemini_model
-	 * and (only if non-empty) portal_ai_gemini_api_key. The key
-	 * field is type=password, so the browser sends an empty value
-	 * when the admin leaves it untouched — we treat that as "keep
-	 * the current key" rather than clobbering it.
+	 * Handle the config-form POST. Updates:
+	 *   - portal_ai_provider (gemini | openai)
+	 *   - portal_ai_gemini_api_key (only if non-empty — see below)
+	 *   - portal_ai_gemini_model
+	 *   - portal_ai_openai_api_key (only if non-empty)
+	 *   - portal_ai_openai_model
+	 *
+	 * Key fields are type=password, so the browser sends an empty
+	 * value when the admin leaves the field untouched. We treat
+	 * that as "keep the current key" rather than clobbering it.
+	 *
+	 * If the provider changed, the Symfony service container is
+	 * purged so the new LlmClient takes effect on the next request
+	 * (otherwise the cached factory result would still point at the
+	 * old provider).
 	 */
 	public function save_options()
 	{
-		$apiKey = trim((string) $this->request->variable('portal_ai_gemini_api_key', '', true));
-		$model = trim((string) $this->request->variable('portal_ai_gemini_model', '', true));
-
-		if ($model === '') {
-			$model = 'gemini-3.1-flash-lite';
+		$provider = $this->request->variable('portal_ai_provider', LlmClientFactory::PROVIDER_GEMINI);
+		if (!in_array($provider, LlmClientFactory::supportedProviders(), true)) {
+			$provider = LlmClientFactory::PROVIDER_GEMINI;
 		}
-		$this->config->set('portal_ai_gemini_model', $model);
+		$providerChanged = (string) ($this->config['portal_ai_provider'] ?? '') !== $provider;
 
-		// Only update the key if the admin actually typed something.
-		// An empty POST value means "leave the current key alone".
-		if ($apiKey !== '') {
-			$this->config->set('portal_ai_gemini_api_key', $apiKey);
+		$geminiKey   = trim((string) $this->request->variable('portal_ai_gemini_api_key', '', true));
+		$geminiModel = trim((string) $this->request->variable('portal_ai_gemini_model', '', true));
+		if ($geminiModel === '') {
+			$geminiModel = 'gemini-3.1-flash-lite';
+		}
+
+		$openaiKey   = trim((string) $this->request->variable('portal_ai_openai_api_key', '', true));
+		$openaiModel = trim((string) $this->request->variable('portal_ai_openai_model', '', true));
+		if ($openaiModel === '') {
+			$openaiModel = 'gpt-4o-mini';
+		}
+
+		$this->config->set('portal_ai_provider', $provider);
+		$this->config->set('portal_ai_gemini_model', $geminiModel);
+		$this->config->set('portal_ai_openai_model', $openaiModel);
+		if ($geminiKey !== '') {
+			$this->config->set('portal_ai_gemini_api_key', $geminiKey);
+		}
+		if ($openaiKey !== '') {
+			$this->config->set('portal_ai_openai_api_key', $openaiKey);
+		}
+
+		if ($providerChanged) {
+			$this->cache->purge();
 		}
 
 		trigger_error(

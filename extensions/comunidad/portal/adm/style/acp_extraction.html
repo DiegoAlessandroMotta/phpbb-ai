@@ -22,6 +22,17 @@
 <fieldset>
 	<legend>{L_ACP_PORTAL_EXTRACTION_LLM}</legend>
 	<dl>
+		<dt><label>{L_ACP_PORTAL_EXTRACTION_PROVIDER}</label><br><span class="explain">{L_ACP_PORTAL_EXTRACTION_PROVIDER_EXPLAIN}</span></dt>
+		<dd>
+			<label><input type="radio" class="radio" name="portal_ai_provider" value="gemini"<!-- IF S_PROVIDER_GEMINI --> checked="checked"<!-- ENDIF --> /> {L_ACP_PORTAL_EXTRACTION_PROVIDER_GEMINI}</label>
+			<label><input type="radio" class="radio" name="portal_ai_provider" value="openai"<!-- IF S_PROVIDER_OPENAI --> checked="checked"<!-- ENDIF --> /> {L_ACP_PORTAL_EXTRACTION_PROVIDER_OPENAI}</label>
+		</dd>
+	</dl>
+</fieldset>
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_EXTRACTION_PROVIDER_GEMINI}</legend>
+	<dl>
 		<dt><label for="portal_ai_gemini_api_key">{L_ACP_PORTAL_EXTRACTION_API_KEY}</label><br><span class="explain">{L_ACP_PORTAL_EXTRACTION_API_KEY_EXPLAIN}</span></dt>
 		<dd>
 			<input type="password" name="portal_ai_gemini_api_key" id="portal_ai_gemini_api_key" autocomplete="off" value="" size="40" />
@@ -36,10 +47,30 @@
 		<dt><label for="portal_ai_gemini_model">{L_ACP_PORTAL_EXTRACTION_MODEL}</label><br><span class="explain">{L_ACP_PORTAL_EXTRACTION_MODEL_EXPLAIN}</span></dt>
 		<dd><input type="text" name="portal_ai_gemini_model" id="portal_ai_gemini_model" value="{PORTAL_AI_GEMINI_MODEL}" size="40" /></dd>
 	</dl>
-	<p class="submit-buttons">
-		<input class="button1" type="submit" id="save" name="save" value="{L_SUBMIT}" />
-	</p>
 </fieldset>
+
+<fieldset>
+	<legend>{L_ACP_PORTAL_EXTRACTION_PROVIDER_OPENAI}</legend>
+	<dl>
+		<dt><label for="portal_ai_openai_api_key">{L_ACP_PORTAL_EXTRACTION_API_KEY}</label><br><span class="explain">{L_ACP_PORTAL_EXTRACTION_API_KEY_EXPLAIN}</span></dt>
+		<dd>
+			<input type="password" name="portal_ai_openai_api_key" id="portal_ai_openai_api_key" autocomplete="off" value="" size="40" />
+			<!-- IF S_OPENAI_KEY_SET -->
+			<span class="portal-llm-key-set">{L_ACP_PORTAL_EXTRACTION_CONFIGURED}</span>
+			<!-- ELSE -->
+			<span class="error">{L_ACP_PORTAL_EXTRACTION_NOT_CONFIGURED}</span>
+			<!-- ENDIF -->
+		</dd>
+	</dl>
+	<dl>
+		<dt><label for="portal_ai_openai_model">{L_ACP_PORTAL_EXTRACTION_MODEL}</label><br><span class="explain">{L_ACP_PORTAL_EXTRACTION_OPENAI_MODEL_EXPLAIN}</span></dt>
+		<dd><input type="text" name="portal_ai_openai_model" id="portal_ai_openai_model" value="{PORTAL_AI_OPENAI_MODEL}" size="40" /></dd>
+	</dl>
+</fieldset>
+
+<p class="submit-buttons">
+	<input class="button1" type="submit" id="save" name="save" value="{L_SUBMIT}" />
+</p>
 </form>
 
 <fieldset>
