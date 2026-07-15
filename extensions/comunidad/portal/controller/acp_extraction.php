@@ -33,7 +33,7 @@ class acp_extraction
 	protected $user;
 	/** @var EntityExtractionService */
 	protected $extraction;
-	/** @var \phpbb\cache\service\cache */
+	/** @var \phpbb\cache\service */
 	protected $cache;
 	/** @var string */
 	protected $u_action;
@@ -51,7 +51,7 @@ class acp_extraction
 		\phpbb\template\template $template,
 		\phpbb\user $user,
 		EntityExtractionService $extraction,
-		\phpbb\cache\service\cache $cache,
+		\phpbb\cache\service $cache,
 		$root_path,
 		$php_ext,
 		$table_prefix
@@ -163,7 +163,7 @@ class acp_extraction
 		$openaiKey   = trim((string) $this->request->variable('portal_ai_openai_api_key', '', true));
 		$openaiModel = trim((string) $this->request->variable('portal_ai_openai_model', '', true));
 		if ($openaiModel === '') {
-			$openaiModel = 'gpt-4o-mini';
+			$openaiModel = 'gpt-5.4-mini';
 		}
 
 		$this->config->set('portal_ai_provider', $provider);

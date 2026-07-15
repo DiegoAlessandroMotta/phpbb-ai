@@ -33,7 +33,7 @@ class OpenAIClient implements LlmClient
 		$configModel = isset($config['portal_ai_openai_model'])
 			? trim((string) $config['portal_ai_openai_model'])
 			: '';
-		$this->model = $configModel !== '' ? $configModel : 'gpt-4o-mini';
+		$this->model = $configModel !== '' ? $configModel : 'gpt-5.4-mini';
 
 		$this->endpoint = self::ENDPOINT;
 	}

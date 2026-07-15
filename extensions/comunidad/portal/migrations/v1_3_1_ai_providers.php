@@ -31,7 +31,7 @@ class v1_3_1_ai_providers extends \phpbb\db\migration\migration
 		return [
 			['config.add', ['portal_ai_provider', 'gemini']],
 			['config.add', ['portal_ai_openai_api_key', '']],
-			['config.add', ['portal_ai_openai_model', 'gpt-4o-mini']],
+			['config.add', ['portal_ai_openai_model', 'gpt-5.4-mini']],
 		];
 	}
 
